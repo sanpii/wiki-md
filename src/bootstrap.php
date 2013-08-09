@@ -1,5 +1,6 @@
 <?php
 
+use \dflydev\markdown\MarkdownParser;
 use \Silex\Provider\TwigServiceProvider;
 use \Silex\Provider\WebProfilerServiceProvider;
 use \Silex\Provider\UrlGeneratorServiceProvider;
@@ -16,6 +17,8 @@ $app = new Silex\Application();
 $app['config'] = require __DIR__ . '/config/current.php';
 
 $app['debug'] = $app['config']['debug'];
+
+$app['parser'] = new MarkdownParser();
 
 $app->register(new TwigServiceProvider(), array(
     'twig.path' => __DIR__ . '/views',

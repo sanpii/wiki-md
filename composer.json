@@ -4,6 +4,7 @@
     "require": {
         "silex/silex": "*",
         "twig/twig": "*",
+        "dflydev/markdown": "*",
         "sanpi/twitter-bootstrap-installer": "*@dev"
     },
     "require-dev": {
