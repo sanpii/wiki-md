@@ -1,6 +1,7 @@
 <?php
 
 use \Symfony\Component\HttpFoundation\Request;
+use \Symfony\Component\HttpFoundation\BinaryFileResponse;
 use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 $app = require __DIR__ . '/bootstrap.php';
@@ -51,7 +52,9 @@ function generateIndex($root, $path, $level = 0)
             continue;
         }
 
-        $summary .= "$indent* [$title](/$root/$filename)\n";
+        if ($fileInfo->isDir() || isMarkdownFile($fileInfo->getPathname())) {
+            $summary .= "$indent* [$title](/$root/$filename)\n";
+        }
         if ($fileInfo->isDir()) {
             $summary .= generateIndex("$root/$filename", $fileInfo->getPathname(), $level + 1);
         }
@@ -59,24 +62,41 @@ function generateIndex($root, $path, $level = 0)
     return $summary;
 }
 
+function isMarkdownFile($filename)
+{
+    return (is_file($filename) && preg_match('/\.md$/', $filename) === 1);
+}
+
 $app->get('{slug}', function($slug) use($app) {
+    $response = null;
     $root = $app['config']['root'];
     $page = "$root/$slug";
 
-    $contents = '# ' . generateBreadcrumb($slug) . "\n";
-    if (is_dir($page)) {
-        $contents .= generateIndex($slug, $page);
-    }
-    elseif (is_file($page)) {
-        $contents .= file_get_contents($page);
+    if (is_file($page) && !isMarkdownFile($page)) {
+        $response = new BinaryFileResponse($page);
     }
     else {
-        throw new NotFoundHttpException("/$slug not found");
+        $contents = '# ' . generateBreadcrumb($slug) . "\n";
+        if (is_dir($page)) {
+            $contents .= generateIndex($slug, $page);
+        }
+        elseif (is_file($page)) {
+            if (isMarkdownFile($page)) {
+                $contents .= file_get_contents($page);
+            }
+            else {
+                $response = new BinaryFileResponse($page);
+            }
+        }
+        else {
+            throw new NotFoundHttpException("/$slug not found");
+        }
+        $response = $app['twig']->render('index.html.twig', array(
+            'title' => $app['config']['title'],
+            'contents' => $app['parser']->transformMarkdown($contents)
+        ));
     }
-    return $app['twig']->render('index.html.twig', array(
-        'title' => $app['config']['title'],
-        'contents' => $app['parser']->transformMarkdown($contents)
-    ));
+    return $response;
 })
 ->value('slug', '.')
 ->assert('slug', '.+');
