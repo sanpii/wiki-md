@@ -5,7 +5,36 @@ use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 $app = require __DIR__ . '/bootstrap.php';
 
-function generateSummary($root, $path, $level = 0)
+function generateBreadcrumb($path)
+{
+    $parts = explode('/', $path);
+    array_unshift($parts, '~');
+
+    $breadcrumb = '';
+
+    for ($i = 0; $i < count($parts); $i++) {
+        if ($i === 0) {
+            $url = '';
+        }
+        else {
+            $url = $parts[$i - 1][0] . '/' . $parts[$i];
+        }
+        $parts[$i] = array($url, $parts[$i]);
+    }
+
+    foreach ($parts as $part) {
+        $url = $part[0];
+        $title = $part[1];
+
+        if ($url === '') {
+            $url = '/';
+        }
+        $breadcrumb .= "/[$title]($url)";
+    }
+    return ltrim($breadcrumb, '/');
+}
+
+function generateIndex($root, $path, $level = 0)
 {
     $summary = '';
 
@@ -24,7 +53,7 @@ function generateSummary($root, $path, $level = 0)
 
         $summary .= "$indent* [$title](/$root/$filename)\n";
         if ($fileInfo->isDir()) {
-            $summary .= generateSummary("$root/$filename", $fileInfo->getPathname(), $level + 1);
+            $summary .= generateIndex("$root/$filename", $fileInfo->getPathname(), $level + 1);
         }
     }
     return $summary;
@@ -34,9 +63,9 @@ $app->get('{slug}', function($slug) use($app) {
     $root = $app['config']['root'];
     $page = "$root/$slug";
 
-    $contents = "# /$slug\n";
+    $contents = '# ' . generateBreadcrumb($slug) . "\n";
     if (is_dir($page)) {
-        $contents .= generateSummary($slug, $page);
+        $contents .= generateIndex($slug, $page);
     }
     elseif (is_file($page)) {
         $contents .= file_get_contents($page);
