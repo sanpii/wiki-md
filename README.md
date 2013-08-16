@@ -1,12 +1,4 @@
-# Spore
-
-[![Build Status](https://travis-ci.org/sanpii/spore.png?branch=master)](https://travis-ci.org/sanpii/spore)
-[![Dependencies Status](https://www.wakuwakuw.com/d/7519698)](http://depending.in/sanpii/spore)
-
-Check other branches for create a specific application:
-
-* rest: create a REST API;
-* security: create a web application with user management.
+# Wiki.md
 
 ## Installation
 
@@ -19,50 +11,30 @@ Check other branches for create a specific application:
     $ ln -s development.php current.php
 
 ## Run
+### Development
 
     $ php -S localhost:8080 -t web/ web/index.php
 
-## Test
+### Production
 
-### Unitary
+    $ cat /etc/nginx/sites-enable/wiki
+    server {
+        listen 80;
+        listen 443;
+        server_name wiki.homecomputing.fr;
+        root /home/git/public_html/wiki-md/web;
+        index index.php;
 
-    $ ./bin/atoum
+        location / {
+            try_files $uri $uri/ @rewrite;
+        }
 
-### Functionally
+        location @rewrite {
+            rewrite ^/(.*)$ /index.php/$1;
+        }
 
-    $ cp behat.yml{-dist,}
-    $ ./bin/behat
-
-## Components
-
-### Silex
-
-> A PHP micro-framework standing on the shoulder of giants
-
-http://silex.sensiolabs.org/
-
-### Pomm
-
-> Pomm is a lightweight, fast, efficient and powerful PHP Object Model Manager
-> for the Postgresql relational database.
-
-http://pomm.coolkeums.org/
-
-### Bootstrap
-
-> Sleek, intuitive, and powerful front-end framework for faster and easier web
-> development.
-
-http://twitter.github.com/bootstrap/
-
-### Atoum
-
-> The simple, modern and intuitive unit testing framework for PHP 5.3+
-
-http://atoum.org/
-
-### Behat
-
-> A php framework for testing your business expectations.
-
-http://behat.org/
+        location ~ \.php(/|$) {
+            include /etc/nginx/fastcgi_params;
+            fastcgi_pass unix:/var/run/php5-fpm/git;
+        }
+    }
