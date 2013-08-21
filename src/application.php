@@ -99,6 +99,6 @@ $app->get('{slug}', function($slug) use($app) {
     return $response;
 })
 ->value('slug', '.')
-->assert('slug', '.+');
+->assert('slug', '^[^_].+');
 
 return $app;
