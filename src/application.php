@@ -1,6 +1,7 @@
 <?php
 
 use \Symfony\Component\HttpFoundation\Request;
+use \Symfony\Component\HttpFoundation\Response;
 use \Symfony\Component\HttpFoundation\BinaryFileResponse;
 use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -67,7 +68,7 @@ function isMarkdownFile($filename)
     return (is_file($filename) && preg_match('/\.md$/', $filename) === 1);
 }
 
-$app->get('{slug}', function($slug) use($app) {
+$app->get('{slug}', function($slug, Request $request) use($app) {
     $response = null;
     $root = $app['config']['root'];
     $page = "$root/$slug";
@@ -76,7 +77,7 @@ $app->get('{slug}', function($slug) use($app) {
         $response = new BinaryFileResponse($page);
     }
     else {
-        $contents = '# ' . generateBreadcrumb($slug) . "\n";
+        $contents = '# ' . generateBreadcrumb($slug) . "\n\n";
         if (is_dir($page)) {
             $contents .= generateIndex($slug, $page);
         }
@@ -91,10 +92,18 @@ $app->get('{slug}', function($slug) use($app) {
         else {
             throw new NotFoundHttpException("/$slug not found");
         }
-        $response = $app['twig']->render('index.html.twig', array(
-            'title' => $app['config']['title'],
-            'contents' => $app['parser']->transformMarkdown($contents)
-        ));
+
+        $accept = explode(',', $request->server->get('HTTP_ACCEPT'));
+        if (in_array('text/html', $accept)) {
+            $response = $app['twig']->render('index.html.twig', array(
+                'title' => $app['config']['title'],
+                'contents' => $app['parser']->transformMarkdown($contents),
+            ));
+        }
+        else {
+            $response = new Response($contents, 200, ['Content-Type' => 'text/plain']);
+        }
+
     }
     return $response;
 })
