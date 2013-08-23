@@ -49,7 +49,7 @@ function generateIndex($root, $path, $level = 0)
         $filename = $fileInfo->getFilename();
         $title = str_replace('.md', '', $filename);
 
-        if ($filename{0} === '.') {
+        if ($filename{0} === '.' || $filename === 'index.md') {
             continue;
         }
 
@@ -79,6 +79,11 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
     else {
         $contents = '# ' . generateBreadcrumb($slug) . "\n\n";
         if (is_dir($page)) {
+            $index = "$page/index.md";
+            if (is_file($index)) {
+                $contents .= "> " . file_get_contents($index) . "\n";
+            }
+
             $contents .= generateIndex($slug, $page);
         }
         elseif (is_file($page)) {
