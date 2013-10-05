@@ -7,6 +7,14 @@ use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 $app = require __DIR__ . '/bootstrap.php';
 
+function generateTitle($appTitle, $path)
+{
+    $parts = explode('/', $path);
+    $parts = array_reverse($parts);
+    $parts[] = $appTitle;
+    return implode(' | ', $parts);
+}
+
 function generateBreadcrumb($path)
 {
     $parts = explode('/', $path);
@@ -101,7 +109,7 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $accept = explode(',', $request->server->get('HTTP_ACCEPT'));
         if (in_array('text/html', $accept)) {
             $response = $app['twig']->render('index.html.twig', array(
-                'title' => $app['config']['title'],
+                'title' => generateTitle($app['config']['title'], $slug),
                 'contents' => $app['parser']->transformMarkdown($contents),
             ));
         }
