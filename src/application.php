@@ -62,7 +62,8 @@ function generateIndex($root, $path, $level = 0)
         }
 
         if ($fileInfo->isDir() || isMarkdownFile($fileInfo->getPathname())) {
-            $summary .= "$indent* [$title](/$root/$filename)\n";
+            $url = "/$root/" . urlencode($filename);
+            $summary .= "$indent* [$title]($url)\n";
         }
         if ($fileInfo->isDir()) {
             $summary .= generateIndex("$root/$filename", $fileInfo->getPathname(), $level + 1);
@@ -79,7 +80,7 @@ function isMarkdownFile($filename)
 $app->get('{slug}', function($slug, Request $request) use($app) {
     $response = null;
     $root = $app['config']['root'];
-    $page = "$root/$slug";
+    $page = urldecode("$root/$slug");
 
     if (is_file($page) && !isMarkdownFile($page)) {
         $response = new BinaryFileResponse($page);
