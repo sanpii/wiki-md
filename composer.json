@@ -2,10 +2,10 @@
     "name": "sanpi/wiki.md",
     "license": "datalove",
     "require": {
-        "silex/silex": "*",
-        "twig/twig": "*",
-        "dflydev/markdown": "*",
-        "sanpi/twitter-bootstrap-installer": "*@dev"
+        "silex/silex": "~1.1",
+        "twig/twig": "~1.15",
+        "dflydev/markdown": "~1.0",
+        "sanpi/twitter-bootstrap-installer": "~1.1"
     },
     "require-dev": {
         "silex/web-profiler": "*"
