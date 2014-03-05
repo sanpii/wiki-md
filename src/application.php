@@ -53,7 +53,7 @@ function generateIndex($root, $path, $level = 0)
     }
 
     $indent = str_pad(' ', $level * 4);
-    foreach (new DirectoryIterator($path) as $fileInfo) {
+    foreach (new \Sanpi\SortableDirectoryIterator($path) as $fileInfo) {
         $filename = $fileInfo->getFilename();
         $title = str_replace('.md', '', $filename);
 
