@@ -86,7 +86,6 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $response = new BinaryFileResponse($page);
     }
     else {
-        $contents = '<nav>' . generateBreadcrumb($slug) . "</nav>\n\n";
         if (is_dir($page)) {
             $index = "$page/index.md";
             if (is_file($index)) {
@@ -110,6 +109,9 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $accept = explode(',', $request->server->get('HTTP_ACCEPT'));
         if (in_array('text/html', $accept)) {
             $response = $app['twig']->render('index.html.twig', array(
+                'nav' => $app['parser']->transformMarkdown(
+                    generateBreadcrumb($slug)
+                ),
                 'title' => generateTitle($app['config']['title'], $slug),
                 'contents' => $app['parser']->transformMarkdown($contents),
             ));
