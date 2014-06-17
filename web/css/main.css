@@ -35,7 +35,11 @@ body {
     margin-top: 28px;
 }
 
-h1 {
+nav {
+    font-size: 36px;
+}
+
+nav, h1 {
     border-bottom: 1px solid #eee;
     margin: 30px 0;
 }

@@ -86,7 +86,7 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $response = new BinaryFileResponse($page);
     }
     else {
-        $contents = '# ' . generateBreadcrumb($slug) . "\n\n";
+        $contents = '<nav>' . generateBreadcrumb($slug) . "</nav>\n\n";
         if (is_dir($page)) {
             $index = "$page/index.md";
             if (is_file($index)) {
