@@ -24,6 +24,18 @@ $app->register(new TwigServiceProvider(), array(
     'twig.path' => __DIR__ . '/views',
 ));
 
+$app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
+    $transform = function($string) use($app) {
+        return $app['parser']->transformMarkdown($string);
+    };
+
+    $twig->addFilter(
+        'markdown',
+        new \Twig_Filter_Function($transform, ['is_safe' => ['html']])
+    );
+    return $twig;
+}));
+
 if (class_exists('\Silex\Provider\WebProfilerServiceProvider')) {
     $app->register(new UrlGeneratorServiceProvider());
     $app->register(new ServiceControllerServiceProvider());
