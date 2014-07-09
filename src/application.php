@@ -86,6 +86,8 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $response = new BinaryFileResponse($page);
     }
     else {
+        $contents = '';
+
         if (is_dir($page)) {
             $index = "$page/index.md";
             if (is_file($index)) {
