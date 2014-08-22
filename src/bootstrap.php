@@ -1,7 +1,8 @@
 <?php
 
+use \Ciconia\Ciconia;
+use \Ciconia\Extension\Gfm;
 use \Silex\Provider\TwigServiceProvider;
-use \dflydev\markdown\MarkdownExtraParser;
 use \Silex\Provider\WebProfilerServiceProvider;
 use \Silex\Provider\UrlGeneratorServiceProvider;
 use \Silex\Provider\ServiceControllerServiceProvider;
@@ -18,7 +19,16 @@ $app['config'] = require __DIR__ . '/config/current.php';
 
 $app['debug'] = $app['config']['debug'];
 
-$app['parser'] = new MarkdownExtraParser();
+$app['parser'] = function () {
+    $parser = new Ciconia();
+    $parser->addExtension(new Gfm\FencedCodeBlockExtension());
+    $parser->addExtension(new Gfm\TaskListExtension());
+    $parser->addExtension(new Gfm\InlineStyleExtension());
+    $parser->addExtension(new Gfm\WhiteSpaceExtension());
+    $parser->addExtension(new Gfm\TableExtension());
+    $parser->addExtension(new Gfm\UrlAutoLinkExtension());
+    return $parser;
+};
 
 $app->register(new TwigServiceProvider(), array(
     'twig.path' => __DIR__ . '/views',
@@ -26,7 +36,7 @@ $app->register(new TwigServiceProvider(), array(
 
 $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
     $transform = function($string) use($app) {
-        return $app['parser']->transformMarkdown($string);
+        return $app['parser']->render($string);
     };
 
     $twig->addFilter(

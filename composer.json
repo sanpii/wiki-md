@@ -4,7 +4,7 @@
     "require": {
         "silex/silex": "~1.1",
         "twig/twig": "~1.15",
-        "dflydev/markdown": "~1.0",
+        "kzykhys/ciconia": "~1.0",
         "sanpi/twitter-bootstrap-installer": "~1.1"
     },
     "require-dev": {
