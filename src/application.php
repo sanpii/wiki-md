@@ -87,8 +87,11 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
     }
     else {
         $contents = '';
+        $isIndex = false;
 
         if (is_dir($page)) {
+            $isIndex = true;
+
             $index = "$page/index.md";
             if (is_file($index)) {
                 $contents .= "> " . file_get_contents($index) . "\n";
@@ -111,6 +114,7 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $accept = explode(',', $request->server->get('HTTP_ACCEPT'));
         if (in_array('text/html', $accept)) {
             $response = $app['twig']->render('index.html.twig', array(
+                'is_index' => $isIndex,
                 'nav' => generateBreadcrumb($slug),
                 'title' => generateTitle($app['config']['title'], $slug),
                 'contents' => $contents,

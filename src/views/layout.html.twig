@@ -12,6 +12,9 @@
                 <div class="navbar-header">
                     {{ nav | markdown }}
                 </div>
+                <div class="collapse navbar-collapse">
+                    {% block navbar %}{% endblock %}
+                </div>
             </div>
         </div>
 
@@ -24,5 +27,7 @@
                 <p class="text-muted">Generated with <a href="https://git.homecomputing.fr/wiki-md/">wiki.md</a>.</p>
             </div>
         </footer>
+
+        {% block javascript %}{% endblock %}
     </body>
 </html>
