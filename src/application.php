@@ -94,7 +94,12 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
 
             $index = "$page/index.md";
             if (is_file($index)) {
-                $contents .= "> " . file_get_contents($index) . "\n";
+                $summary = file_get_contents($index);
+
+                foreach (explode("\n", $summary) as $line) {
+                    $contents .= "> $line\n";
+                }
+                $contents .= "\n";
             }
 
             $contents .= generateIndex($slug, $page);
