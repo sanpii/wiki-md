@@ -55,7 +55,7 @@ function generateIndex($root, $path, $level = 0)
     $indent = str_pad('', $level * 4);
     foreach (new \Sanpi\SortableDirectoryIterator($path) as $fileInfo) {
         $filename = $fileInfo->getFilename();
-        $title = str_replace('.md', '', $filename);
+        $title = ucfirst(str_replace('.md', '', $filename));
 
         if ($filename{0} === '.' || $filename === 'index.md') {
             continue;
