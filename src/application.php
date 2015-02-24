@@ -7,6 +7,23 @@ use \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 $app = require __DIR__ . '/bootstrap.php';
 
+function getRootDirectory($config, Request $request)
+{
+    $root = $config['root'];
+
+    if (is_array($root)) {
+        $site = $request->server->get('HTTP_HOST');
+
+        if (isset($root[$site])) {
+            $root = $root[$site];
+        }
+        else {
+            $root = reset($root);
+        }
+    }
+    return $root;
+}
+
 function generateTitle($appTitle, $path)
 {
     $parts = explode('/', $path);
@@ -114,7 +131,7 @@ function isMedia($filename)
 }
 
 $app->get('/thumbnail/{slug}', function ($slug, Request $request) use($app) {
-    $root = $app['config']['root'];
+    $root = getRootDirectory($app['config'], $request);
     $page = urldecode("$root/$slug");
 
     if (is_dir($page)) {
@@ -142,7 +159,7 @@ $app->get('/thumbnail/{slug}', function ($slug, Request $request) use($app) {
 
 $app->get('{slug}', function($slug, Request $request) use($app) {
     $response = null;
-    $root = $app['config']['root'];
+    $root = getRootDirectory($app['config'], $request);
     $page = urldecode("$root/$slug");
 
     if (is_file($page) && !isMarkdownFile($page)) {

@@ -1,7 +1,9 @@
 <?php
 
-return array(
+return [
     'debug' => true,
     'title' => 'Personnal wiki',
-    'root' => '/home/sanpi/wiki',
-);
+    'root' => [
+        'localhost:8080' => '/home/sanpi/wiki',
+    ],
+];
