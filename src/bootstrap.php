@@ -30,6 +30,10 @@ $app['parser'] = function () {
     return $parser;
 };
 
+$app['imagine'] = function () {
+    return new \Imagine\Imagick\Imagine();
+};
+
 $app->register(new TwigServiceProvider(), array(
     'twig.path' => __DIR__ . '/views',
 ));

@@ -44,7 +44,7 @@ function generateBreadcrumb($path)
     return ltrim($breadcrumb, '/');
 }
 
-function generateIndex($root, $path, $level = 0)
+function generateIndex($root, $path, $media)
 {
     $summary = '';
 
@@ -52,23 +52,44 @@ function generateIndex($root, $path, $level = 0)
         return $summary;
     }
 
-    $indent = str_pad('', $level * 4);
+    if ($media === true) {
+        $summary .= '<ul class="media">';
+    }
+    else {
+        $summary .= '<ul>';
+    }
+
     foreach (new \Sanpi\SortableDirectoryIterator($path) as $fileInfo) {
+        $path = $fileInfo->getPathname();
         $filename = $fileInfo->getFilename();
+        $url = "/$root/" . urlencode($filename);
         $title = ucfirst(str_replace('.md', '', $filename));
 
         if ($filename{0} === '.' || $filename === 'index.md') {
             continue;
         }
 
-        if ($fileInfo->isDir() || isMarkdownFile($fileInfo->getPathname())) {
-            $url = "/$root/" . urlencode($filename);
-            $summary .= "$indent* [$title]($url)\n";
+        if ($media === true) {
+            if ($fileInfo->isDir()) {
+                $summary .= "<li class=\"folder\" data-content=\"$title\"><a href=\"$url\"><img src=\"/thumbnail$url\" /></a></li>";
+            }
+            elseif (isMedia($path)) {
+                $summary .= "<li><a href=\"$url\"><img src=\"/thumbnail$url\" /></a></li>";
+            }
         }
-        if ($fileInfo->isDir()) {
-            $summary .= generateIndex("$root/$filename", $fileInfo->getPathname(), $level + 1);
+        elseif ($fileInfo->isDir() || isMarkdownFile($path)) {
+            $summary .= "<li><a href=\"$url\">$title</a>";
+        }
+
+        if ($media === false && $fileInfo->isDir()) {
+            $summary .= generateIndex("$root/$filename", $path, $media);
+        }
+
+        if ($fileInfo->isDir() || isMarkdownFile($path) || isMedia($path)) {
+            $summary .= "</li>";
         }
     }
+    $summary .= '</ul>';
     return $summary;
 }
 
@@ -76,6 +97,48 @@ function isMarkdownFile($filename)
 {
     return (is_file($filename) && preg_match('/\.md$/', $filename) === 1);
 }
+
+function isImage($filename)
+{
+    return (is_file($filename) && preg_match('/\.(jpg|jpeg|png|gif)/i', $filename) === 1);
+}
+
+function isVideo($filename)
+{
+    return (is_file($filename) && preg_match('/\.(mpeg|ogv|ogg|mp3|mp4)/i', $filename) === 1);
+}
+
+function isMedia($filename)
+{
+    return (isImage($filename) || isVideo($filename));
+}
+
+$app->get('/thumbnail/{slug}', function ($slug, Request $request) use($app) {
+    $root = $app['config']['root'];
+    $page = urldecode("$root/$slug");
+
+    if (is_dir($page)) {
+        foreach (new \Sanpi\SortableDirectoryIterator($page) as $fileInfo) {
+            if (isImage($fileInfo->getPathname())) {
+                $page .= "/{$fileInfo->getFilename()}";
+                break;
+            }
+        }
+    }
+
+    if (!isImage($page)) {
+        $page = __DIR__ . '/../web/img/missing.png';
+    }
+    $image = $app['imagine']->open($page)
+        ->thumbnail(
+            new \Imagine\Image\Box(200, 200),
+            \Imagine\Image\ImageInterface::THUMBNAIL_OUTBOUND
+        )
+        ->show('png');
+    return new Response($image, 200, ['Content-Type' => 'image/png']);
+})
+->value('slug', '.')
+->assert('slug', '^[^_].+');
 
 $app->get('{slug}', function($slug, Request $request) use($app) {
     $response = null;
@@ -102,7 +165,8 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
                 $contents .= "\n";
             }
 
-            $contents .= generateIndex($slug, $page);
+            $media = is_file("$page/.media");
+            $contents .= generateIndex($slug, $page, $media);
         }
         elseif (is_file($page)) {
             if (isMarkdownFile($page)) {

@@ -1,16 +1,21 @@
 # Wiki.md
 
+Enhanced directory listing:
+
+* Render markdown file;
+* Directory with a ``.media`` file is displayed as thumbnails.
+
 ## Installation
 
+    $ git clone https://github.com/sanpii/wiki-md.git
     $ curl http://getcomposer.org/installer | php
-    $ php composer.phar -sdev create-project sanpi/spore
 
 ## Configuration
 
-    $ cd src/config
-    $ ln -s development.php current.php
+    $ cp src/config/{development,current}.php
 
 ## Run
+
 ### Development
 
     $ php -S localhost:8080 -t web/ web/index.php

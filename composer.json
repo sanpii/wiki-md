@@ -2,9 +2,11 @@
     "name": "sanpi/wiki.md",
     "license": "datalove",
     "require": {
+        "ext-imagick": "*",
         "silex/silex": "~1.1",
         "twig/twig": "~1.15",
         "kzykhys/ciconia": "~1.0",
+        "imagine/imagine": "~0.6",
         "sanpi/twitter-bootstrap-installer": "~1.1"
     },
     "require-dev": {
