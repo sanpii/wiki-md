@@ -200,7 +200,7 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $accept = explode(',', $request->server->get('HTTP_ACCEPT'));
         if (in_array('text/html', $accept)) {
             $response = $app['twig']->render('index.html.twig', array(
-                'is_index' => $isIndex,
+                'is_index' => (!$media && $isIndex),
                 'nav' => generateBreadcrumb($slug),
                 'title' => generateTitle($app['config']['title'], $slug),
                 'contents' => $contents,
