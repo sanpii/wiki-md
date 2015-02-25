@@ -34,9 +34,9 @@ $app['imagine'] = function () {
     return new \Imagine\Imagick\Imagine();
 };
 
-$app->register(new TwigServiceProvider(), array(
+$app->register(new TwigServiceProvider(), [
     'twig.path' => __DIR__ . '/views',
-));
+]);
 
 $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
     $transform = function($string) use($app) {
@@ -55,9 +55,9 @@ if (class_exists('\Silex\Provider\WebProfilerServiceProvider')) {
     $app->register(new ServiceControllerServiceProvider());
 
     $profiler = new WebProfilerServiceProvider();
-    $app->register($profiler, array(
+    $app->register($profiler, [
         'profiler.cache_dir' => __DIR__ . '/../cache/profiler',
-    ));
+    ]);
     $app->mount('/_profiler', $profiler);
 }
 

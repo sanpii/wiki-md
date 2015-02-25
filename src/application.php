@@ -46,7 +46,7 @@ function generateBreadcrumb($path)
         else {
             $url = $parts[$i - 1][0] . '/' . $parts[$i];
         }
-        $parts[$i] = array($url, $parts[$i]);
+        $parts[$i] = [$url, $parts[$i]];
     }
 
     foreach ($parts as $part) {
@@ -199,12 +199,12 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
 
         $accept = explode(',', $request->server->get('HTTP_ACCEPT'));
         if (in_array('text/html', $accept)) {
-            $response = $app['twig']->render('index.html.twig', array(
+            $response = $app['twig']->render('index.html.twig', [
                 'is_index' => (!$media && $isIndex),
                 'nav' => generateBreadcrumb($slug),
                 'title' => generateTitle($app['config']['title'], $slug),
                 'contents' => $contents,
-            ));
+            ]);
         }
         else {
             $response = new Response($contents, 200, ['Content-Type' => 'text/plain']);
