@@ -123,17 +123,17 @@ function isMarkdownFile($filename)
 
 function isImage($filename)
 {
-    return (is_file($filename) && preg_match('/\.(jpg|jpeg|png|gif)/i', $filename) === 1);
+    return (is_file($filename) && preg_match('/\.(jpg|jpeg|png|gif)$/i', $filename) === 1);
 }
 
 function isVideo($filename)
 {
-    return (is_file($filename) && preg_match('/\.(mpeg|ogv|mp4)/i', $filename) === 1);
+    return (is_file($filename) && preg_match('/\.(mpeg|ogv|mp4)$/i', $filename) === 1);
 }
 
 function isSound($filename)
 {
-    return (is_file($filename) && preg_match('/\.(ogg|mp3)/i', $filename) === 1);
+    return (is_file($filename) && preg_match('/\.(ogg|mp3)$/i', $filename) === 1);
 }
 
 function isMedia($filename)
