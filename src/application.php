@@ -90,8 +90,14 @@ function generateIndex($root, $path, $media)
             if ($fileInfo->isDir()) {
                 $summary .= "<li class=\"folder\" data-content=\"$title\"><a href=\"$url\"><img src=\"/thumbnail$url\" /></a></li>";
             }
-            elseif (isMedia($path)) {
+            elseif (isImage($path)) {
                 $summary .= "<li><a href=\"$url\"><img src=\"/thumbnail$url\" /></a></li>";
+            }
+            elseif (isSound($path)) {
+                $summary .= "<li data-content=\"$title\"><a href=\"$url\"><i class=\"glyphicon glyphicon-music\"></i></a></li>";
+            }
+            elseif (isVideo($path)) {
+                $summary .= "<li data-content=\"$title\"><a href=\"$url\"><i class=\"glyphicon glyphicon-film\"></i></a></li>";
             }
         }
         elseif ($fileInfo->isDir() || isMarkdownFile($path)) {
@@ -122,12 +128,17 @@ function isImage($filename)
 
 function isVideo($filename)
 {
-    return (is_file($filename) && preg_match('/\.(mpeg|ogv|ogg|mp3|mp4)/i', $filename) === 1);
+    return (is_file($filename) && preg_match('/\.(mpeg|ogv|mp4)/i', $filename) === 1);
+}
+
+function isSound($filename)
+{
+    return (is_file($filename) && preg_match('/\.(ogg|mp3)/i', $filename) === 1);
 }
 
 function isMedia($filename)
 {
-    return (isImage($filename) || isVideo($filename));
+    return (isImage($filename) || isVideo($filename) || isSound($filename));
 }
 
 $app->get('/thumbnail/{slug}', function ($slug, Request $request) use($app) {
@@ -146,12 +157,14 @@ $app->get('/thumbnail/{slug}', function ($slug, Request $request) use($app) {
     if (!isImage($page)) {
         $page = __DIR__ . '/../web/img/missing.png';
     }
+
     $image = $app['imagine']->open($page)
         ->thumbnail(
             new \Imagine\Image\Box(200, 200),
             \Imagine\Image\ImageInterface::THUMBNAIL_OUTBOUND
         )
         ->show('png');
+
     return new Response($image, 200, ['Content-Type' => 'image/png']);
 })
 ->value('slug', '.')

@@ -35,7 +35,7 @@ img {
     margin: 4px;
     border-radius: 4%;
     overflow: hidden;
-    background-color: #eee;
+    background-color: #ccc;
 }
 
 .media li.folder {
@@ -47,7 +47,7 @@ img {
         7px 7px 0 rgba(0, 0, 0, 0.150);
 }
 
-.media li.folder:before {
+.media li:before {
     content: attr(data-content);
     position: absolute;
     z-index: 1;
@@ -55,6 +55,12 @@ img {
     left: 5px;
     color: #fff;
     font-weight: bold;
+}
+
+.media li i.glyphicon {
+    font-size: 124px;
+    padding: 38px;
+    color: white;
 }
 
 footer {
