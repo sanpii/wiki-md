@@ -76,7 +76,7 @@ function generateIndex($root, $path, $media)
         $summary .= '<ul>';
     }
 
-    foreach (new \Sanpi\SortableDirectoryIterator($path) as $fileInfo) {
+    foreach (new \Sanpi\SortableDirectoryIterator($path) as $id => $fileInfo) {
         $path = $fileInfo->getPathname();
         $filename = $fileInfo->getFilename();
         $url = "/$root/" . urlencode($filename);
@@ -91,7 +91,17 @@ function generateIndex($root, $path, $media)
                 $summary .= "<li class=\"folder\" data-content=\"$title\"><a href=\"$url\"><img src=\"/thumbnail$url\" /></a></li>";
             }
             elseif (isImage($path)) {
-                $summary .= "<li><a href=\"$url\"><img src=\"/thumbnail$url\" /></a></li>";
+                $summary .= <<<EOD
+<li>
+    <a href="#media-$id"><img src="/thumbnail$url" /></a>
+    <div id="media-$id" class="overlay">
+        <a href="$url"><img src="$url" /></a>
+        <div class="description">
+            <a href="#" class="close"><i class="glyphicon glyphicon-remove"></i></a>
+        </div>
+    </div>
+</li>
+EOD;
             }
             elseif (isSound($path)) {
                 $summary .= "<li data-content=\"$title\"><a href=\"$url\"><i class=\"glyphicon glyphicon-music\"></i></a></li>";
