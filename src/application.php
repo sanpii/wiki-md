@@ -189,6 +189,7 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $response = new BinaryFileResponse($page);
     }
     else {
+        $media = false;
         $contents = '';
         $isIndex = false;
 
