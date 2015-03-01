@@ -1,10 +1,10 @@
 <ul class="media">
     {% for id, file in files %}
-        {% if file.path|is_dir %}
+        {% if file.info.isDir %}
             <li class="folder" data-content="{{ file.title }}">
                 <a href="{{ file.url }}"><img src="{{ file.thumbnail }}" /></a>
             </li>
-        {% elseif file.path|is_image %}
+        {% elseif file.info.isImage %}
             <li>
                 <a href="#media-{{ file.id }}"><img src="{{ file.thumbnail }}" /></a>
                 <div id="media-{{ file.id }}" class="overlay">
@@ -14,11 +14,11 @@
                     </div>
                 </div>
             </li>
-        {% elseif file.path|is_sound %}
+        {% elseif file.info.isSound %}
             <li data-content="{{ file.title }}"><a href="{{ file.url }}">
                 <i class="glyphicon glyphicon-music"></i></a>
             </li>
-        {% elseif file.path|is_video %}
+        {% elseif file.info.isVideo %}
             <li data-content="{{ file.title }}"><a href="{{ file.url }}">
                 <i class="glyphicon glyphicon-film"></i></a>
             </li>

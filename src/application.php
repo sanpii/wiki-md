@@ -71,23 +71,19 @@ function generateMedia($app, $root, $path)
 
     $files = [];
 
-    foreach (new \Sanpi\SortableDirectoryIterator($path) as $id => $fileInfo) {
+    foreach (new \Sanpi\SortableDirectoryIterator($path) as $id => $file) {
         if ($id{0} === '.' || $id === 'index.md') {
             continue;
         }
 
         $url = "/$root/" . urlencode($id);
-        $path = $fileInfo->getPathName();
+        $path = $file->getPathName();
 
         $files[] = [
             'id' => $id,
             'url' => $url,
+            'info' => $file,
             'title' => ucfirst(str_replace('.md', '', $id)),
-            'is_dir' => $fileInfo->isDir(),
-            'is_image' => isImage($path),
-            'is_sound' => isSound($path),
-            'is_video' => isVideo($path),
-            'is_markdown' => isMarkdownFile($path),
             'thumbnail' => "/thumbnail$url",
         ];
     }
@@ -106,24 +102,24 @@ function generateIndex($root, $path)
     $files = [];
 
     $summary .= "<ul>";
-    foreach (new \Sanpi\SortableDirectoryIterator($path) as $id => $fileInfo) {
+    foreach (new \Sanpi\SortableDirectoryIterator($path) as $id => $file) {
         if ($id{0} === '.' || $id === 'index.md') {
             continue;
         }
 
         $url = "/$root/" . urlencode($id);
-        $filename = $fileInfo->getFilename();
         $title = ucfirst(str_replace('.md', '', $id));
 
-        if ($fileInfo->isDir() || isMarkdownFile($fileInfo->getPathname())) {
+        if ($file->isDir() || $file->isMarkdown()) {
             $summary .= "<li><a href=\"$url\">$title</a>";
         }
 
-        if ($fileInfo->isDir()) {
-            $summary .= generateIndex("$root/$filename", $fileInfo->getPathname());
+        if ($file->isDir()) {
+            $filename = $file->getFilename();
+            $summary .= generateIndex("$root/$filename", $file->getPathName());
         }
 
-        if ($fileInfo->isDir() || isMarkdownFile($fileInfo->getPathname())) {
+        if ($file->isDir() || $file->isMarkdown()) {
             $summary .= "</li>";
         }
     }
@@ -135,17 +131,18 @@ function generateIndex($root, $path)
 $app->get('/thumbnail/{slug}', function ($slug, Request $request) use($app) {
     $root = getRootDirectory($app['config'], $request);
     $page = urldecode("$root/$slug");
+    $file = new \Sanpi\File($page);
 
-    if (is_dir($page)) {
-        foreach (new \Sanpi\SortableDirectoryIterator($page) as $fileInfo) {
-            if (isImage($fileInfo->getPathname())) {
-                $page .= "/{$fileInfo->getFilename()}";
+    if ($file->isDir()) {
+        foreach (new \Sanpi\SortableDirectoryIterator($page) as $file) {
+            if ($file->isImage()) {
+                $page .= "/{$file->getFilename()}";
                 break;
             }
         }
     }
 
-    if (!isImage($page)) {
+    if (!$file->isImage()) {
         $page = __DIR__ . '/../web/img/missing.png';
     }
 
@@ -165,8 +162,9 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
     $response = null;
     $root = getRootDirectory($app['config'], $request);
     $page = urldecode("$root/$slug");
+    $file = new \Sanpi\File($page);
 
-    if (is_file($page) && !isMarkdownFile($page)) {
+    if ($file->isFile() && !$file->isMarkdown()) {
         $response = new BinaryFileResponse($page);
     }
     else {
@@ -174,7 +172,7 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         $contents = '';
         $isIndex = false;
 
-        if (is_dir($page)) {
+        if ($file->isDir()) {
             $isIndex = true;
 
             $index = "$page/index.md";
@@ -195,8 +193,8 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
                 $contents .= generateIndex($slug, $page);
             }
         }
-        elseif (is_file($page)) {
-            if (isMarkdownFile($page)) {
+        elseif ($file->isFile()) {
+            if ($file->isMarkdown()) {
                 $contents .= file_get_contents($page);
             }
             else {

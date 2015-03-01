@@ -48,43 +48,6 @@ $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
         new \Twig_Filter_Function($transform, ['is_safe' => ['html']])
     );
 
-    $twig->addFilter(
-        'is_image',
-        new \Twig_Filter_Function(function ($filename) {
-            return (
-                is_file($filename)
-                && preg_match('/\.(jpg|jpeg|png|gif)$/i', $filename) === 1
-            );
-        })
-    );
-
-    $twig->addFilter(
-        'is_video',
-        new \Twig_Filter_Function(function ($filename) {
-            return (
-                is_file($filename)
-                && preg_match('/\.(mpeg|ogv|mp4)$/i', $filename) === 1
-            );
-        })
-    );
-
-    $twig->addFilter(
-        'is_sound',
-        new \Twig_Filter_Function(function ($filename) {
-            return (
-                is_file($filename)
-                && preg_match('/\.(ogg|mp3)$/i', $filename) === 1
-            );
-        })
-    );
-
-    $twig->addFilter(
-        'is_dir',
-        new \Twig_Filter_Function(function ($filename) {
-            return is_dir($filename);
-        })
-    );
-
     return $twig;
 }));
 

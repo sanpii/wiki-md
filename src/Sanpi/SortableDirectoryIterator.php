@@ -12,7 +12,10 @@ class SortableDirectoryIterator implements \IteratorAggregate
         $files = new \DirectoryIterator($path);
 
         foreach ($files as $file) {
-            $this->storage->offsetSet($file->getFilename(), $file->getFileInfo());
+            $this->storage->offsetSet(
+                $file->getFilename(),
+                new File($file->getPathName())
+            );
         }
 
         $this->storage->uksort(function ($a, $b) {
