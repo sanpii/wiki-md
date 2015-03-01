@@ -22,17 +22,17 @@
                 </a>
 
                 <div id="media-{{ file.id }}" class="overlay">
-                    <a href="{{ file.url }}">
-                        {% if file.info.isImage %}
-                            <img src="{{ file.url }}" />
-                        {% elseif file.info.isSound %}
-                            <audio src="{{ file.url }}" controls></audio>
-                        {% elseif file.info.isVideo %}
-                            <video src="{{ file.url }}" controls></video>
-                        {% endif %}
-                    </a>
+                    {% if file.info.isImage %}
+                        <img src="{{ file.url }}" />
+                    {% elseif file.info.isSound %}
+                        <audio src="{{ file.url }}" controls></audio>
+                    {% elseif file.info.isVideo %}
+                        <video src="{{ file.url }}" controls></video>
+                    {% endif %}
+
                     <div class="description">
                         <a href="#" class="close"><i class="glyphicon glyphicon-remove"></i></a>
+                        <a href="{{ file.url }}" download><i class="glyphicon glyphicon-download-alt"></i></a>
                     </div>
                 </div>
 
