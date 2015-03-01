@@ -19,8 +19,14 @@
                 <i class="glyphicon glyphicon-music"></i></a>
             </li>
         {% elseif file.info.isVideo %}
-            <li data-content="{{ file.title }}"><a href="{{ file.url }}">
-                <i class="glyphicon glyphicon-film"></i></a>
+            <li data-content="{{ file.title }}">
+                <a href="#media-{{ file.id }}"><i class="glyphicon glyphicon-film"></i></a>
+                <div id="media-{{ file.id }}" class="overlay">
+                    <video src="{{ file.url }}" controls></video>
+                    <div class="description">
+                        <a href="#" class="close"><i class="glyphicon glyphicon-remove"></i></a>
+                    </div>
+                </div>
             </li>
         {% endif %}
     {% endfor %}
