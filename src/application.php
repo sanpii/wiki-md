@@ -61,7 +61,7 @@ function generateBreadcrumb($path)
     return ltrim($breadcrumb, '/');
 }
 
-function generateIndex($root, $path, $media)
+function generateMedia($app, $root, $path)
 {
     $summary = '';
 
@@ -69,86 +69,67 @@ function generateIndex($root, $path, $media)
         return $summary;
     }
 
-    if ($media === true) {
-        $summary .= '<ul class="media">';
-    }
-    else {
-        $summary .= '<ul>';
-    }
+    $files = [];
 
     foreach (new \Sanpi\SortableDirectoryIterator($path) as $id => $fileInfo) {
-        $path = $fileInfo->getPathname();
-        $filename = $fileInfo->getFilename();
-        $url = "/$root/" . urlencode($filename);
-        $title = ucfirst(str_replace('.md', '', $filename));
-
-        if ($filename{0} === '.' || $filename === 'index.md') {
+        if ($id{0} === '.' || $id === 'index.md') {
             continue;
         }
 
-        if ($media === true) {
-            if ($fileInfo->isDir()) {
-                $summary .= "<li class=\"folder\" data-content=\"$title\"><a href=\"$url\"><img src=\"/thumbnail$url\" /></a></li>";
-            }
-            elseif (isImage($path)) {
-                $summary .= <<<EOD
-<li>
-    <a href="#media-$id"><img src="/thumbnail$url" /></a>
-    <div id="media-$id" class="overlay">
-        <a href="$url"><img src="$url" /></a>
-        <div class="description">
-            <a href="#" class="close"><i class="glyphicon glyphicon-remove"></i></a>
-        </div>
-    </div>
-</li>
-EOD;
-            }
-            elseif (isSound($path)) {
-                $summary .= "<li data-content=\"$title\"><a href=\"$url\"><i class=\"glyphicon glyphicon-music\"></i></a></li>";
-            }
-            elseif (isVideo($path)) {
-                $summary .= "<li data-content=\"$title\"><a href=\"$url\"><i class=\"glyphicon glyphicon-film\"></i></a></li>";
-            }
+        $url = "/$root/" . urlencode($id);
+        $path = $fileInfo->getPathName();
+
+        $files[] = [
+            'id' => $id,
+            'url' => $url,
+            'title' => ucfirst(str_replace('.md', '', $id)),
+            'is_dir' => $fileInfo->isDir(),
+            'is_image' => isImage($path),
+            'is_sound' => isSound($path),
+            'is_video' => isVideo($path),
+            'is_markdown' => isMarkdownFile($path),
+            'thumbnail' => "/thumbnail$url",
+        ];
+    }
+
+    return $app['twig']->render('panel.html.twig', compact('files'));
+}
+
+function generateIndex($root, $path)
+{
+    $summary = '';
+
+    if (empty($path)) {
+        return $summary;
+    }
+
+    $files = [];
+
+    $summary .= "<ul>";
+    foreach (new \Sanpi\SortableDirectoryIterator($path) as $id => $fileInfo) {
+        if ($id{0} === '.' || $id === 'index.md') {
+            continue;
         }
-        elseif ($fileInfo->isDir() || isMarkdownFile($path)) {
+
+        $url = "/$root/" . urlencode($id);
+        $filename = $fileInfo->getFilename();
+        $title = ucfirst(str_replace('.md', '', $id));
+
+        if ($fileInfo->isDir() || isMarkdownFile($fileInfo->getPathname())) {
             $summary .= "<li><a href=\"$url\">$title</a>";
         }
 
-        if ($media === false && $fileInfo->isDir()) {
-            $summary .= generateIndex("$root/$filename", $path, $media);
+        if ($fileInfo->isDir()) {
+            $summary .= generateIndex("$root/$filename", $fileInfo->getPathname());
         }
 
-        if ($fileInfo->isDir() || isMarkdownFile($path) || isMedia($path)) {
+        if ($fileInfo->isDir() || isMarkdownFile($fileInfo->getPathname())) {
             $summary .= "</li>";
         }
     }
-    $summary .= '</ul>';
+    $summary .= "</ul>";
+
     return $summary;
-}
-
-function isMarkdownFile($filename)
-{
-    return (is_file($filename) && preg_match('/\.md$/', $filename) === 1);
-}
-
-function isImage($filename)
-{
-    return (is_file($filename) && preg_match('/\.(jpg|jpeg|png|gif)$/i', $filename) === 1);
-}
-
-function isVideo($filename)
-{
-    return (is_file($filename) && preg_match('/\.(mpeg|ogv|mp4)$/i', $filename) === 1);
-}
-
-function isSound($filename)
-{
-    return (is_file($filename) && preg_match('/\.(ogg|mp3)$/i', $filename) === 1);
-}
-
-function isMedia($filename)
-{
-    return (isImage($filename) || isVideo($filename) || isSound($filename));
 }
 
 $app->get('/thumbnail/{slug}', function ($slug, Request $request) use($app) {
@@ -207,7 +188,12 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
             }
 
             $media = is_file("$page/.media");
-            $contents .= generateIndex($slug, $page, $media);
+            if ($media === true) {
+                $contents .= generateMedia($app, $slug, $page);
+            }
+            else {
+                $contents .= generateIndex($slug, $page);
+            }
         }
         elseif (is_file($page)) {
             if (isMarkdownFile($page)) {
