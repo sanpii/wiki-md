@@ -16,6 +16,13 @@ class File
         return $this->hasExtension(['md']);
     }
 
+    public function isMedia()
+    {
+        return $this->isImage()
+            || $this->isVideo()
+            || $this->isSound();
+    }
+
     public function isImage()
     {
         return $this->hasExtension(['jpg', 'jpeg', 'png', 'gif']);

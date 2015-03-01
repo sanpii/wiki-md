@@ -4,29 +4,38 @@
             <li class="folder" data-content="{{ file.title }}">
                 <a href="{{ file.url }}"><img src="{{ file.thumbnail }}" /></a>
             </li>
-        {% elseif file.info.isImage %}
-            <li>
-                <a href="#media-{{ file.id }}"><img src="{{ file.thumbnail }}" /></a>
+        {% elseif file.info.isMedia %}
+            {% if file.info.isImage %}
+                <li>
+            {% else %}
+                <li data-content="{{ file.title }}">
+            {% endif %}
+
+                <a href="#media-{{ file.id }}">
+                    {% if file.info.isImage %}
+                        <img src="{{ file.thumbnail }}" />
+                    {% elseif file.info.isSound %}
+                        <i class="glyphicon glyphicon-music"></i></a>
+                    {% elseif file.info.isVideo %}
+                        <i class="glyphicon glyphicon-film"></i>
+                    {% endif %}
+                </a>
+
                 <div id="media-{{ file.id }}" class="overlay">
-                    <a href="{{ file.url }}"><img src="{{ file.url }}" /></a>
+                    <a href="{{ file.url }}">
+                        {% if file.info.isImage %}
+                            <img src="{{ file.url }}" />
+                        {% elseif file.info.isSound %}
+                            <audio src="{{ file.url }}" controls></audio>
+                        {% elseif file.info.isVideo %}
+                            <video src="{{ file.url }}" controls></video>
+                        {% endif %}
+                    </a>
                     <div class="description">
                         <a href="#" class="close"><i class="glyphicon glyphicon-remove"></i></a>
                     </div>
                 </div>
-            </li>
-        {% elseif file.info.isSound %}
-            <li data-content="{{ file.title }}"><a href="{{ file.url }}">
-                <i class="glyphicon glyphicon-music"></i></a>
-            </li>
-        {% elseif file.info.isVideo %}
-            <li data-content="{{ file.title }}">
-                <a href="#media-{{ file.id }}"><i class="glyphicon glyphicon-film"></i></a>
-                <div id="media-{{ file.id }}" class="overlay">
-                    <video src="{{ file.url }}" controls></video>
-                    <div class="description">
-                        <a href="#" class="close"><i class="glyphicon glyphicon-remove"></i></a>
-                    </div>
-                </div>
+
             </li>
         {% endif %}
     {% endfor %}
