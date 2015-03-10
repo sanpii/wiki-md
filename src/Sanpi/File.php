@@ -42,7 +42,7 @@ class File
     {
         return (
             $this->isFile()
-            && preg_match('/\.(' . implode('|', $ext) . ')$/i', $this->getFilename()) === 1
+            && in_array(strtolower($this->getExtension()), $ext)
         );
     }
 
