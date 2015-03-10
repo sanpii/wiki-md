@@ -164,6 +164,10 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
     $page = urldecode("$root/$slug");
     $file = new \Sanpi\File($page);
 
+    if (!$file->isReadable()) {
+        throw new NotFoundHttpException("/$slug not found");
+    }
+
     if ($file->isFile() && !$file->isMarkdown()) {
         $response = new BinaryFileResponse($page);
     }
@@ -193,16 +197,8 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
                 $contents .= generateIndex($slug, $page);
             }
         }
-        elseif ($file->isFile()) {
-            if ($file->isMarkdown()) {
-                $contents .= file_get_contents($page);
-            }
-            else {
-                $response = new BinaryFileResponse($page);
-            }
-        }
-        else {
-            throw new NotFoundHttpException("/$slug not found");
+        elseif ($file->isMarkdown()) {
+            $contents .= file_get_contents($page);
         }
 
         $accept = explode(',', $request->server->get('HTTP_ACCEPT'));
@@ -217,8 +213,8 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
         else {
             $response = new Response($contents, 200, ['Content-Type' => 'text/plain']);
         }
-
     }
+
     return $response;
 })
 ->value('slug', '.')
