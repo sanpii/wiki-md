@@ -169,7 +169,11 @@ $app->get('{slug}', function($slug, Request $request) use($app) {
     }
 
     if ($file->isFile() && !$file->isMarkdown()) {
-        $response = new BinaryFileResponse($page);
+        $response = new BinaryFileResponse(
+            $page,
+            200,
+            ['Cache-Control' => 'public, max-age=2592000, must-revalidate']
+        );
     }
     else {
         $media = false;
