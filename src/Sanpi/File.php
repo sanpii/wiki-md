@@ -30,7 +30,7 @@ class File
 
     public function isVideo()
     {
-        return $this->hasExtension(['mpeg', 'ogv', 'mp4']);
+        return $this->hasExtension(['mpeg', 'ogv', 'mp4', 'mov']);
     }
 
     public function isSound()
