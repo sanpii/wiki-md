@@ -1,0 +1,5 @@
+/.env
+/Cargo.lock
+/target
+/static/lib
+**/*.rs.bk
