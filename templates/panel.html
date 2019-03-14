@@ -1,0 +1,48 @@
+<ul class="list-media">
+    {% for file in files %}
+        {% if file.info.is_dir %}
+            <li class="folder" data-content="{{ file.title }}">
+                <a href="{{ file.url }}"><i class="fas fa-folder"></i></a>
+            </li>
+        {% elif file.info.is_media %}
+            {% if file.info.is_image %}
+                <li>
+            {% else %}
+                <li data-content="{{ file.title }}">
+            {% endif %}
+
+                <a href="#media-{{ file.id }}">
+                    {% if file.info.is_image %}
+                        <img src="{{ file.thumbnail }}" />
+                    {% elif file.info.is_sound %}
+                        <i class="fas fa-music"></i></a>
+                    {% elif file.info.is_video %}
+                        <i class="fas fa-film"></i>
+                    {% endif %}
+                </a>
+
+                <div id="media-{{ file.id }}" class="overlay">
+                    {% if file.info.is_image %}
+                        <img src="{{ file.url }}" />
+                    {% elif file.info.is_sound %}
+                        <audio src="{{ file.url }}" controls></audio>
+                    {% elif file.info.is_video %}
+                        <video src="{{ file.url }}" controls></video>
+                    {% endif %}
+
+                    <div class="description">
+                        <a href="#" class="close"><i class="fas fa-times"></i></a>
+                        <a href="{{ file.url }}" download><i class="fas fa-download"></i></a>
+                    </div>
+                </div>
+
+            </li>
+        {% else %}
+            <li data-content="{{ file.title }}">
+                <a href="{{ file.url}}" download>
+                    <i class="fas fa-file"></i>
+                </a>
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>

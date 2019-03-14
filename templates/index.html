@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block javascript %}
+    <script src="/js/search.js"></script>
+{% endblock %}
+
+{% block navbar %}
+    {% if is_index %}
+        <form class="navbar-form navbar-right" role="search">
+            <input type="text" class="form-control" autocomplete="off" placeholder="Search" id="search">
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {{ contents | safe }}
+{% endblock %}

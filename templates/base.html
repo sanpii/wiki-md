@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{{ title }}</title>
+        {% block head %}{% endblock %}
+        <link href="/static/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" media="screen" />
+        <link href="/static/lib/Font-Awesome/css/all.min.css" rel="stylesheet" media="screen" />
+        <link href="/static/css/main.css" rel="stylesheet" media="screen" />
+    </head>
+    <body>
+
+        <div class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    {{ nav | markdown }}
+                </div>
+                <div class="collapse navbar-collapse">
+                    {% block navbar %}{% endblock %}
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+
+        {% block javascript %}{% endblock %}
+    </body>
+</html>
