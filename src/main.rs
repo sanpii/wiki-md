@@ -332,6 +332,10 @@ fn link(root: &str, path: &std::path::Path, entry: &walkdir::DirEntry) -> String
         .unwrap()
         .display();
 
+    if !root.starts_with('/') {
+        root.insert_str(0, "/");
+    }
+
     if !root.ends_with('/') {
         root.push_str("/");
     }
