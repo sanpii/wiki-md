@@ -305,6 +305,7 @@ fn generate_index(root: &str, path: &std::path::Path) -> String
     }
 
     let walker = walkdir::WalkDir::new(path)
+        .sort_by(|a, b| a.file_name().cmp(b.file_name()))
         .min_depth(1)
         .into_iter();
 
