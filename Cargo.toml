@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 actix-web = "0.7"
-dotenv = "0.13"
+dotenv = "0.14"
 image = "0.21"
 pulldown-cmark = "0.5"
 tera = "0.11"
