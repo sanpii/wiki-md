@@ -5,7 +5,7 @@ mod media;
 use error::Error;
 use media::Media;
 
-struct State {
+struct Data {
     template: tera::Tera,
     root: std::path::PathBuf,
     title: String,
@@ -19,33 +19,30 @@ fn main()
 
     let bind = format!("{}:{}", env("LISTEN_IP"), env("LISTEN_PORT"));
 
-    actix_web::server::new(|| {
+    actix_web::HttpServer::new(|| {
         let root = env("APP_WIKI_ROOT");
         let title = env("APP_TITLE");
         let mut template = tera::compile_templates!("templates/**/*");
         template.register_filter("markdown", filters::markdown);
 
-        let state = State {
+        let data = Data {
             root: std::path::PathBuf::from(root),
             template,
             title,
         };
 
-        let static_files = actix_web::fs::StaticFiles::new("static/")
-            .expect("failed constructing static files handler");
-        let errors = actix_web::middleware::ErrorHandlers::new()
-                .handler(actix_web::http::StatusCode::NOT_FOUND, |req, res| error(404, req, res))
-                .handler(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR, |req, res| error(500, req, res));
+        let static_files = actix_files::Files::new("/static", "static/");
 
-        actix_web::App::with_state(state)
-            .middleware(errors)
-            .handler("/static", static_files)
-            .route("/thumbnail/{slug:.*}", actix_web::http::Method::GET, thumbnail)
-            .route("/{slug:.*}", actix_web::http::Method::GET, index)
+        actix_web::App::new()
+            .data(data)
+            .service(static_files)
+            .route("/thumbnail/{slug:.*}", actix_web::web::get().to(thumbnail))
+            .route("/{slug:.*}", actix_web::web::get().to(index))
     })
     .bind(&bind)
     .unwrap_or_else(|_| panic!("Can not bind to {}", bind))
-    .run();
+    .run()
+    .unwrap();
 }
 
 fn env(name: &str) -> String
@@ -54,7 +51,7 @@ fn env(name: &str) -> String
         .unwrap_or_else(|_| panic!("Missing {} env variable", name))
 }
 
-fn thumbnail(request: actix_web::HttpRequest<State>) -> actix_web::HttpResponse
+fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
 {
     let path = get_path(&request);
 
@@ -63,7 +60,7 @@ fn thumbnail(request: actix_web::HttpRequest<State>) -> actix_web::HttpResponse
         Err(_) => {
             use actix_web::Responder;
 
-            return actix_web::fs::NamedFile::open("static/img/missing.png")
+            return actix_files::NamedFile::open("static/img/missing.png")
                 .unwrap()
                 .respond_to(&request)
                 .unwrap();
@@ -98,17 +95,18 @@ fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static s
     }
 }
 
-fn index(request: actix_web::HttpRequest<State>) -> actix_web::HttpResponse
+fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse, Error>
 {
     use std::io::Read;
 
-    let slug: String = request.match_info().query("slug")
+    let data: &Data = &request.app_data()
         .unwrap();
+    let slug = request.match_info().query("slug");
 
     let path = get_path(&request);
 
     if !path.exists() {
-        return Error::NotFound.into();
+        return Err(Error::NotFound);
     }
 
     let mut media = false;
@@ -140,9 +138,9 @@ fn index(request: actix_web::HttpRequest<State>) -> actix_web::HttpResponse
         media = path.join(".media").exists();
 
         if media {
-            let media = match generate_media(&request.state().template, &slug, &path) {
+            let media = match generate_media(&data.template, &slug, &path) {
                 Ok(contents) => contents,
-                Err(err) => return err.into(),
+                Err(err) => return Err(err),
             };
             contents.push_str(&media);
             context.insert("contents", &contents);
@@ -158,12 +156,12 @@ fn index(request: actix_web::HttpRequest<State>) -> actix_web::HttpResponse
 
         let mut file = match std::fs::File::open(path) {
             Ok(file) => file,
-            Err(_) => return Error::NotFound.into(),
+            Err(_) => return Err(Error::NotFound),
         };
 
         match file.read_to_string(&mut contents) {
             Ok(_) => (),
-            Err(_) => return Error::NotFound.into(),
+            Err(_) => return Err(Error::NotFound),
         };
 
         context.insert("contents", &markdown(&contents));
@@ -171,24 +169,28 @@ fn index(request: actix_web::HttpRequest<State>) -> actix_web::HttpResponse
     else {
         use actix_web::Responder;
 
-        return actix_web::fs::NamedFile::open(path)
+        let response = actix_files::NamedFile::open(path)
             .unwrap()
             .respond_to(&request)
             .unwrap();
+
+        return Ok(response);
     }
 
     context.insert("is_index", &(!media && is_index));
     context.insert("nav", &generate_breadcrumb(&slug));
-    context.insert("title", &generate_title(&request.state().title, &slug));
+    context.insert("title", &generate_title(&data.title, &slug));
 
-    let body = match request.state().template.render("index.html", &context) {
+    let body = match data.template.render("index.html", &context) {
         Ok(body) => body,
-        Err(err) => return Error::from(err).into(),
+        Err(err) => return Err(Error::from(err)),
     };
 
-    actix_web::HttpResponse::Ok()
+    let response = actix_web::HttpResponse::Ok()
         .content_type("text/html")
-        .body(body)
+        .body(body);
+
+    Ok(response)
 }
 
 fn is_markdown(path: &std::path::Path) -> bool
@@ -196,35 +198,14 @@ fn is_markdown(path: &std::path::Path) -> bool
     path.extension() == Some(std::ffi::OsStr::new("md"))
 }
 
-fn error(status: u32, request: &actix_web::HttpRequest<State>, resp: actix_web::HttpResponse)
-    -> actix_web::Result<::actix_web::middleware::Response>
+fn get_path(request: &actix_web::HttpRequest) -> std::path::PathBuf
 {
-    let template = format!("errors/{}.html", status);
-    let mut context = tera::Context::new();
-    context.insert("title", &request.state().title);
-    context.insert("nav", "");
-
-    let body = match request.state().template.render(&template, &context) {
-        Ok(body) => body,
-        Err(_) => "Internal server error".to_string(),
-    };
-
-    let builder = resp.into_builder()
-        .header(actix_web::http::header::CONTENT_TYPE, "text/html")
-        .body(body);
-
-    Ok(actix_web::middleware::Response::Done(builder))
-}
-
-fn get_path(request: &actix_web::HttpRequest<State>) -> std::path::PathBuf
-{
-    let slug: String = request.match_info().query("slug")
+    let slug = request.match_info().query("slug");
+    let data: &Data = request.app_data()
         .unwrap();
 
-    let root = &request.state().root;
-
     let mut path = std::path::PathBuf::new();
-    path.push(root);
+    path.push(&data.root);
     path.push(slug);
 
     path
