@@ -1,8 +1,8 @@
 use tera::Value;
 
 pub fn markdown(
-    value: Value,
-    _: std::collections::HashMap<String, Value>
+    value: &Value,
+    _: &std::collections::HashMap<String, Value>
 ) -> tera::Result<Value> {
 
     let input = tera::try_get_value!("markdown", "value", String, value);

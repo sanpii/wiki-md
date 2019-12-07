@@ -22,7 +22,10 @@ fn main()
     actix_web::HttpServer::new(|| {
         let root = env("APP_WIKI_ROOT");
         let title = env("APP_TITLE");
-        let mut template = tera::compile_templates!("templates/**/*");
+        let mut template = match tera::Tera::new("templates/**/*") {
+            Ok(template) => template,
+            Err(err) => panic!("Parsing error(s): {}", err),
+        };
         template.register_filter("markdown", filters::markdown);
 
         let data = Data {

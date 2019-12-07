@@ -45,7 +45,10 @@ impl actix_web::error::ResponseError for Error
         let status: actix_web::http::StatusCode = self.into();
 
         let file = format!("errors/{}.html", u16::from(status));
-        let template = tera::compile_templates!("templates/**/*");
+        let template = match tera::Tera::new("templates/**/*") {
+            Ok(template) => template,
+            Err(err) => panic!("Parsing error(s): {}", err),
+        };
         let body = match template.render(&file, &tera::Context::new()) {
             Ok(body) => body,
             Err(err) => {
