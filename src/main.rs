@@ -5,13 +5,15 @@ mod media;
 use error::Error;
 use media::Media;
 
+#[derive(Debug)]
 struct Data {
     template: tera::Tera,
     root: std::path::PathBuf,
     title: String,
 }
 
-fn main()
+#[actix_rt::main]
+async fn main() -> std::io::Result<()>
 {
     #[cfg(debug_assertions)]
     dotenv::dotenv()
@@ -37,15 +39,14 @@ fn main()
         let static_files = actix_files::Files::new("/static", "static/");
 
         actix_web::App::new()
-            .data(data)
+            .app_data(data)
             .service(static_files)
             .route("/thumbnail/{slug:.*}", actix_web::web::get().to(thumbnail))
             .route("/{slug:.*}", actix_web::web::get().to(index))
     })
-    .bind(&bind)
-    .unwrap_or_else(|_| panic!("Can not bind to {}", bind))
+    .bind(&bind)?
     .run()
-    .unwrap();
+    .await
 }
 
 fn env(name: &str) -> String
@@ -54,7 +55,7 @@ fn env(name: &str) -> String
         .unwrap_or_else(|_| panic!("Missing {} env variable", name))
 }
 
-fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
+async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
 {
     let path = get_path(&request);
 
@@ -66,6 +67,7 @@ fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
             return actix_files::NamedFile::open("static/img/missing.png")
                 .unwrap()
                 .respond_to(&request)
+                .await
                 .unwrap();
         },
     };
@@ -98,7 +100,7 @@ fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static s
     }
 }
 
-fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse, Error>
+async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse, Error>
 {
     use std::io::Read;
 
@@ -175,6 +177,7 @@ fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse, Err
         let response = actix_files::NamedFile::open(path)
             .unwrap()
             .respond_to(&request)
+            .await
             .unwrap();
 
         return Ok(response);

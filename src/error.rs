@@ -40,7 +40,7 @@ impl Into<actix_web::http::StatusCode> for &Error
 
 impl actix_web::error::ResponseError for Error
 {
-    fn render_response(&self) -> actix_web::HttpResponse
+    fn error_response(&self) -> actix_web::HttpResponse
     {
         let status: actix_web::http::StatusCode = self.into();
 
