@@ -13,7 +13,7 @@
         <div class="navbar navbar-default" role="navigation">
             <div class="container">
                 <div class="navbar-header">
-                    {{ nav | markdown }}
+                    {{ nav | markdown | safe }}
                 </div>
                 <div class="collapse navbar-collapse">
                     {% block navbar %}{% endblock %}
