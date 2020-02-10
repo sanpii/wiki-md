@@ -91,11 +91,11 @@ fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static s
         .map_or("".to_string(), |s| s.to_ascii_lowercase());
 
     match ext.as_str() {
-        "png" => (image::ImageOutputFormat::PNG, "image/png"),
-        "jpeg" | "jpg" => (image::ImageOutputFormat::JPEG(80), "image/jpeg"),
-        "gif" => (image::ImageOutputFormat::GIF, "image/gif"),
-        "bmp" => (image::ImageOutputFormat::BMP, "image/bmp"),
-        "ico" => (image::ImageOutputFormat::ICO, "image/x-icon"),
+        "png" => (image::ImageOutputFormat::Png, "image/png"),
+        "jpeg" | "jpg" => (image::ImageOutputFormat::Jpeg(80), "image/jpeg"),
+        "gif" => (image::ImageOutputFormat::Gif, "image/gif"),
+        "bmp" => (image::ImageOutputFormat::Bmp, "image/bmp"),
+        "ico" => (image::ImageOutputFormat::Ico, "image/x-icon"),
         _ => (image::ImageOutputFormat::Unsupported(ext), "image/octet-stream"),
     }
 }
