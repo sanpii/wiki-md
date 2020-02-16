@@ -13,13 +13,11 @@
         <div class="navbar navbar-default" role="navigation">
             <div class="container">
                 {% if nav is defined %}
-                    <div class="navbar-header">
+                    <div class="navbar-nav mr-auto">
                         {{ nav | markdown | safe }}
                     </div>
                 {% endif %}
-                <div class="collapse navbar-collapse">
-                    {% block navbar %}{% endblock %}
-                </div>
+                {% block navbar %}{% endblock %}
             </div>
         </div>
 
