@@ -3,13 +3,14 @@
 mod error;
 mod filters;
 mod media;
+mod template;
 
 use error::Error;
 use media::Media;
+use template::Template;
 
-#[derive(Debug)]
 struct Data {
-    template: tera::Tera,
+    template: Template,
     root: std::path::PathBuf,
     title: String,
 }
@@ -17,6 +18,8 @@ struct Data {
 #[actix_rt::main]
 async fn main() -> std::io::Result<()>
 {
+    env_logger::init();
+
     #[cfg(debug_assertions)]
     dotenv::dotenv()
         .ok();
@@ -26,11 +29,8 @@ async fn main() -> std::io::Result<()>
     actix_web::HttpServer::new(|| {
         let root = env("APP_WIKI_ROOT");
         let title = env("APP_TITLE");
-        let mut template = match tera::Tera::new("templates/**/*") {
-            Ok(template) => template,
-            Err(err) => panic!("Parsing error(s): {}", err),
-        };
-        template.register_filter("markdown", filters::markdown);
+        let template = Template::new();
+        template.clone().watch();
 
         let data = Data {
             root: std::path::PathBuf::from(root),
@@ -255,7 +255,7 @@ fn generate_breadcrumb(slug: &str) -> String
     breadcrumb
 }
 
-fn generate_media(template: &tera::Tera, root: &str, path: &std::path::Path) -> Result<String, Error>
+fn generate_media(template: &Template, root: &str, path: &std::path::Path) -> Result<String, Error>
 {
     let mut files = vec![];
 
