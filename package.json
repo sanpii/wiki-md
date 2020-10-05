@@ -1,0 +1,7 @@
+{
+    "name": "oog",
+    "dependencies": {
+        "bootstrap": "^4.2",
+        "@fortawesome/fontawesome-free": "^5.7"
+    }
+}
