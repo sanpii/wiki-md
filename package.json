@@ -2,6 +2,6 @@
     "name": "wiki-md",
     "dependencies": {
         "bootstrap": "^4.2",
-        "Font-Awesome": "^5.7"
+        "@fortawesome/fontawesome-free": "^5.7"
     }
 }
