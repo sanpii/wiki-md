@@ -3,14 +3,14 @@
 mod error;
 mod filters;
 mod media;
-mod template;
 
 use error::Error;
 use media::Media;
-use template::Template;
+
+static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
 struct Data {
-    template: Template,
+    template: tera_hot::Template,
     root: std::path::PathBuf,
     title: String,
 }
@@ -29,8 +29,8 @@ async fn main() -> std::io::Result<()>
     actix_web::HttpServer::new(|| {
         let root = env("APP_WIKI_ROOT");
         let title = env("APP_TITLE");
-        let template = Template::new();
-        template.clone().watch();
+        let mut template = tera_hot::Template::new(TEMPLATE_DIR);
+        template.register_filter("markdown", crate::filters::markdown);
 
         let data = Data {
             root: std::path::PathBuf::from(root),
@@ -255,7 +255,7 @@ fn generate_breadcrumb(slug: &str) -> String
     breadcrumb
 }
 
-fn generate_media(template: &Template, root: &str, path: &std::path::Path) -> Result<String, Error>
+fn generate_media(template: &tera_hot::Template, root: &str, path: &std::path::Path) -> Result<String, Error>
 {
     let mut files = vec![];
 
