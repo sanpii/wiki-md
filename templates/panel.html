@@ -2,7 +2,7 @@
     {% for file in files %}
         {% if file.info.is_dir %}
             <li class="folder" data-content="{{ file.title }}">
-                <a href="{{ file.url }}"><i class="fas fa-folder"></i></a>
+                <a href="{{ file.url }}"><i class="bi bi-folder"></i></a>
             </li>
         {% elif file.info.is_media %}
             {% if file.info.is_image %}
@@ -15,9 +15,9 @@
                     {% if file.info.is_image %}
                         <img src="{{ file.thumbnail }}" />
                     {% elif file.info.is_sound %}
-                        <i class="fas fa-music"></i></a>
+                        <i class="bi bi-music"></i></a>
                     {% elif file.info.is_video %}
-                        <i class="fas fa-film"></i>
+                        <i class="bi bi-film"></i>
                     {% endif %}
                 </a>
 
@@ -31,8 +31,8 @@
                     {% endif %}
 
                     <div class="description">
-                        <a href="#" class="close"><i class="fas fa-times"></i></a>
-                        <a href="{{ file.url }}" download><i class="fas fa-download"></i></a>
+                        <a href="#" class="close"><i class="btn-close"></i></a>
+                        <a href="{{ file.url }}" download><i class="bi bi-download"></i></a>
                     </div>
                 </div>
 
@@ -40,7 +40,7 @@
         {% else %}
             <li data-content="{{ file.title }}">
                 <a href="{{ file.url}}" download>
-                    <i class="fas fa-file"></i>
+                    <i class="bi bi-file-earmark"></i>
                 </a>
             </li>
         {% endif %}

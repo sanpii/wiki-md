@@ -89,11 +89,11 @@ h1 {
     font-weight: bold;
 }
 
-.list-media .fas {
+.list-media .bi {
     color: white;
 }
 
-.list-media li > a > .fas {
+.list-media li > a > .bi {
     font-size: 124px;
     padding: 38px;
 }
@@ -131,7 +131,7 @@ h1 {
     width: 70px;
 }
 
-.list-media .overlay .description .fas {
+.list-media .overlay .description .bi {
     margin-top: 10px;
     font-size: 50px;
 }
