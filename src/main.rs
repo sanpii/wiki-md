@@ -167,6 +167,7 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
             Err(_) => return Err(Error::NotFound),
         };
 
+        context.insert("toc", &table_of_content(&contents));
         context.insert("contents", &markdown(&contents));
     }
     else {
@@ -224,7 +225,47 @@ fn markdown(input: &str) -> String
     let parser = pulldown_cmark::Parser::new_ext(input, options);
     pulldown_cmark::html::push_html(&mut output, parser);
 
-    output
+    let regex = regex::Regex::new(r#"<h1>(?P<text>.*?)</h1>"#).unwrap();
+
+    regex.replace_all(&output, |caps: &regex::Captures<'_>| {
+        let id = text_to_id(&caps["text"]);
+
+        format!("<h1 id=\"{id}\">{}</h1>", &caps["text"])
+    }).to_string()
+}
+
+fn text_to_id(text: &str) -> String {
+    text.to_lowercase().replace(' ', "-")
+}
+
+fn table_of_content(input: &str) -> String {
+    let mut toc = String::new();
+    let mut current_level = None;
+
+    let parser = pulldown_cmark::Parser::new(input);
+
+    for event in parser {
+        use pulldown_cmark::{Event::*, Tag::*};
+
+        match event {
+            Start(Heading(level, _, _)) if level == pulldown_cmark::HeadingLevel::H1 => {
+                toc.push_str("<ul>\n");
+                current_level = Some(level);
+            }
+            Text(text) if current_level.is_some() => {
+                toc.push_str(&format!("<li><a href=\"#{}\">{}</a></li>\n", text_to_id(&text), text));
+            }
+            End(Heading(level, _, _)) => {
+                if Some(level) <= current_level {
+                    toc.push_str("</ul>\n");
+                    current_level = None;
+                }
+            }
+            _ => (),
+        }
+    }
+
+    toc
 }
 
 fn generate_title(title: &str, slug: &str) -> String
