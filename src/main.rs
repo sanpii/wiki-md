@@ -134,7 +134,6 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
                 file.read_to_string(&mut summary)
                     .ok();
 
-                #[allow(clippy::trivial_regex)]
                 let regex = regex::Regex::new(r"(?m)^")
                     .unwrap();
 
@@ -150,13 +149,12 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
                 Err(err) => return Err(err),
             };
             contents.push_str(&media);
-            context.insert("contents", &contents);
         }
         else {
             let index = generate_index(&slug, &path);
             contents.push_str(&markdown(&index));
-            context.insert("contents", &contents);
         }
+        context.insert("contents", &contents);
     }
     else if is_markdown(&path) {
         let mut contents = String::new();
@@ -322,11 +320,11 @@ fn link(root: &str, path: &std::path::Path, entry: &walkdir::DirEntry) -> String
         .display();
 
     if !root.starts_with('/') {
-        root.insert_str(0, "/");
+        root.insert(0, '/');
     }
 
     if !root.ends_with('/') {
-        root.push_str("/");
+        root.push('/');
     }
 
     let link = format!("{}{}", root, entry);

@@ -25,13 +25,13 @@ impl std::fmt::Display for Error
     }
 }
 
-impl Into<actix_web::http::StatusCode> for &Error
+impl From<&Error> for actix_web::http::StatusCode
 {
-    fn into(self) -> actix_web::http::StatusCode
+    fn from(error: &Error) -> Self
     {
         use actix_web::http::StatusCode;
 
-        match self {
+        match error {
             Error::NotFound => StatusCode::NOT_FOUND,
             Error::Template(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
