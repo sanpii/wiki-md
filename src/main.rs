@@ -106,7 +106,7 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
 {
     use std::io::Read;
 
-    let data: &Data = &request.app_data()
+    let data: &Data = request.app_data()
         .unwrap();
     let slug = request.match_info().query("slug");
 
@@ -144,14 +144,14 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
         media = path.join(".media").exists();
 
         if media {
-            let media = match generate_media(&data.template, &slug, &path) {
+            let media = match generate_media(&data.template, slug, &path) {
                 Ok(contents) => contents,
                 Err(err) => return Err(err),
             };
             contents.push_str(&media);
         }
         else {
-            let index = generate_index(&slug, &path);
+            let index = generate_index(slug, &path);
             contents.push_str(&markdown(&index));
         }
         context.insert("contents", &contents);
@@ -184,8 +184,8 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
     }
 
     context.insert("is_index", &(!media && is_index));
-    context.insert("nav", &generate_breadcrumb(&slug));
-    context.insert("title", &generate_title(&data.title, &slug));
+    context.insert("nav", &generate_breadcrumb(slug));
+    context.insert("title", &generate_title(&data.title, slug));
 
     let body = match data.template.render("index.html", &context) {
         Ok(body) => body,
@@ -225,7 +225,7 @@ fn markdown(input: &str) -> String
     options.insert(pulldown_cmark::Options::ENABLE_TABLES);
     options.insert(pulldown_cmark::Options::ENABLE_FOOTNOTES);
 
-    let parser = pulldown_cmark::Parser::new_ext(&input, options);
+    let parser = pulldown_cmark::Parser::new_ext(input, options);
     pulldown_cmark::html::push_html(&mut output, parser);
 
     output
@@ -268,10 +268,10 @@ fn generate_media(template: &tera_hot::Template, root: &str, path: &std::path::P
 
     for entry in walker.filter_entry(|e| !is_hidden(e)) {
         let entry = entry.unwrap();
-        let url = link(root, &path, &entry);
+        let url = link(root, path, &entry);
         let title = title(&entry);
 
-        files.push(Media::new(&entry.path(), &url, &title));
+        files.push(Media::new(entry.path(), &url, &title));
     }
 
     let mut context = tera::Context::new();
@@ -301,7 +301,7 @@ fn generate_index(root: &str, path: &std::path::Path) -> String
 
         if entry.path().is_dir() || is_markdown(entry.path()) {
             let indent = " ".repeat((entry.depth() - 1) * 4);
-            let link = link(root, &path, &entry);
+            let link = link(root, path, &entry);
             let title = title(&entry);
 
             summary.push_str(&format!("{}* [{}]({})\n", indent, title, link));

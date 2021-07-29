@@ -38,10 +38,10 @@ impl Info
     {
         Self {
             is_dir: path.is_dir(),
-            is_image: Self::is_image(&path),
-            is_sound: Self::is_sound(&path),
-            is_video: Self::is_video(&path),
-            is_media: Self::is_media(&path),
+            is_image: Self::is_image(path),
+            is_sound: Self::is_sound(path),
+            is_video: Self::is_video(path),
+            is_media: Self::is_media(path),
         }
     }
 
