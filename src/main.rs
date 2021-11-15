@@ -68,9 +68,7 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
 
             return actix_files::NamedFile::open("static/img/missing.png")
                 .unwrap()
-                .respond_to(&request)
-                .await
-                .unwrap();
+                .respond_to(&request);
         },
     };
 
@@ -176,9 +174,7 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
 
         let response = actix_files::NamedFile::open(path)
             .unwrap()
-            .respond_to(&request)
-            .await
-            .unwrap();
+            .respond_to(&request);
 
         return Ok(response);
     }
