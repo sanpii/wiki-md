@@ -78,7 +78,7 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
     let mut body: Vec<u8> = Vec::new();
     let (format, content_type) = guess_format(&path);
 
-    thumbnail.write_to(&mut body, format)
+    thumbnail.write_to(&mut std::io::Cursor::new(&mut body), format)
         .unwrap();
 
     actix_web::HttpResponse::Ok()
