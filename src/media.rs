@@ -8,10 +8,8 @@ pub struct Media {
     pub thumbnail: String,
 }
 
-impl Media
-{
-    pub fn new(path: &std::path::Path, url: &str, title: &str) -> Self
-    {
+impl Media {
+    pub fn new(path: &std::path::Path, url: &str, title: &str) -> Self {
         Self {
             path: path.to_path_buf(),
             id: url.to_string(),
@@ -32,10 +30,8 @@ pub struct Info {
     is_media: bool,
 }
 
-impl Info
-{
-    pub fn new(path: &std::path::Path) -> Self
-    {
+impl Info {
+    pub fn new(path: &std::path::Path) -> Self {
         Self {
             is_dir: path.is_dir(),
             is_image: Self::is_image(path),
@@ -45,30 +41,23 @@ impl Info
         }
     }
 
-    fn is_media(path: &std::path::Path) -> bool
-    {
-        Self::is_image(path)
-            || Self::is_sound(path)
-            || Self::is_video(path)
+    fn is_media(path: &std::path::Path) -> bool {
+        Self::is_image(path) || Self::is_sound(path) || Self::is_video(path)
     }
 
-    fn is_image(path: &std::path::Path) -> bool
-    {
+    fn is_image(path: &std::path::Path) -> bool {
         ["jpg", "jpeg", "png", "gif"].contains(&Self::extension(path))
     }
 
-    fn is_video(path: &std::path::Path) -> bool
-    {
+    fn is_video(path: &std::path::Path) -> bool {
         ["mpeg", "ogv", "mp4", "mov"].contains(&Self::extension(path))
     }
 
-    fn is_sound(path: &std::path::Path) -> bool
-    {
+    fn is_sound(path: &std::path::Path) -> bool {
         ["ogg", "mp3"].contains(&Self::extension(path))
     }
 
-    fn extension(path: &std::path::Path) -> &str
-    {
+    fn extension(path: &std::path::Path) -> &str {
         path.extension()
             .unwrap_or_default()
             .to_str()

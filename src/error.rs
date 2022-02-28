@@ -4,18 +4,14 @@ pub enum Error {
     Template(tera::Error),
 }
 
-impl From<tera::Error> for Error
-{
-    fn from(err: tera::Error) -> Self
-    {
+impl From<tera::Error> for Error {
+    fn from(err: tera::Error) -> Self {
         Error::Template(err)
     }
 }
 
-impl std::fmt::Display for Error
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
-    {
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
             Error::NotFound => "Not found",
             Error::Template(_) => "Template error",
@@ -25,10 +21,8 @@ impl std::fmt::Display for Error
     }
 }
 
-impl From<&Error> for actix_web::http::StatusCode
-{
-    fn from(error: &Error) -> Self
-    {
+impl From<&Error> for actix_web::http::StatusCode {
+    fn from(error: &Error) -> Self {
         use actix_web::http::StatusCode;
 
         match error {
@@ -38,10 +32,8 @@ impl From<&Error> for actix_web::http::StatusCode
     }
 }
 
-impl actix_web::error::ResponseError for Error
-{
-    fn error_response(&self) -> actix_web::HttpResponse
-    {
+impl actix_web::error::ResponseError for Error {
+    fn error_response(&self) -> actix_web::HttpResponse {
         let status: actix_web::http::StatusCode = self.into();
 
         let file = format!("errors/{}.html", u16::from(status));

@@ -16,13 +16,11 @@ struct Data {
 }
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()>
-{
+async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     #[cfg(debug_assertions)]
-    dotenv::dotenv()
-        .ok();
+    dotenv::dotenv().ok();
 
     let bind = format!("{}:{}", env("LISTEN_IP"), env("LISTEN_PORT"));
 
@@ -51,14 +49,11 @@ async fn main() -> std::io::Result<()>
     .await
 }
 
-fn env(name: &str) -> String
-{
-    std::env::var(name)
-        .unwrap_or_else(|_| panic!("Missing {} env variable", name))
+fn env(name: &str) -> String {
+    std::env::var(name).unwrap_or_else(|_| panic!("Missing {} env variable", name))
 }
 
-async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
-{
+async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
     let path = get_path(&request);
 
     let image = match image::open(&path) {
@@ -69,14 +64,15 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
             return actix_files::NamedFile::open("static/img/missing.png")
                 .unwrap()
                 .respond_to(&request);
-        },
+        }
     };
 
     let thumbnail = image.thumbnail(200, 200);
     let mut body: Vec<u8> = Vec::new();
     let (format, content_type) = guess_format(&path);
 
-    thumbnail.write_to(&mut std::io::Cursor::new(&mut body), format)
+    thumbnail
+        .write_to(&mut std::io::Cursor::new(&mut body), format)
         .unwrap();
 
     actix_web::HttpResponse::Ok()
@@ -84,9 +80,9 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse
         .body(body)
 }
 
-fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static str)
-{
-    let ext = path.extension()
+fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static str) {
+    let ext = path
+        .extension()
         .and_then(|s| s.to_str())
         .map_or("".to_string(), |s| s.to_ascii_lowercase());
 
@@ -96,16 +92,17 @@ fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static s
         "gif" => (image::ImageOutputFormat::Gif, "image/gif"),
         "bmp" => (image::ImageOutputFormat::Bmp, "image/bmp"),
         "ico" => (image::ImageOutputFormat::Ico, "image/x-icon"),
-        _ => (image::ImageOutputFormat::Unsupported(ext), "image/octet-stream"),
+        _ => (
+            image::ImageOutputFormat::Unsupported(ext),
+            "image/octet-stream",
+        ),
     }
 }
 
-async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse, Error>
-{
+async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse, Error> {
     use std::io::Read;
 
-    let data: &Data = request.app_data()
-        .unwrap();
+    let data: &Data = request.app_data().unwrap();
     let slug = request.match_info().query("slug");
 
     let path = get_path(&request);
@@ -129,11 +126,9 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
             if let Ok(mut file) = std::fs::File::open(index) {
                 let mut summary = String::new();
 
-                file.read_to_string(&mut summary)
-                    .ok();
+                file.read_to_string(&mut summary).ok();
 
-                let regex = regex::Regex::new(r"(?m)^")
-                    .unwrap();
+                let regex = regex::Regex::new(r"(?m)^").unwrap();
 
                 contents = markdown(&regex.replace_all(&summary, "> "));
             }
@@ -147,14 +142,12 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
                 Err(err) => return Err(err),
             };
             contents.push_str(&media);
-        }
-        else {
+        } else {
             let index = generate_index(slug, &path);
             contents.push_str(&markdown(&index));
         }
         context.insert("contents", &contents);
-    }
-    else if is_markdown(&path) {
+    } else if is_markdown(&path) {
         let mut contents = String::new();
 
         let mut file = match std::fs::File::open(path) {
@@ -169,8 +162,7 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
 
         context.insert("toc", &table_of_content(&contents));
         context.insert("contents", &markdown(&contents));
-    }
-    else {
+    } else {
         use actix_web::Responder;
 
         let response = actix_files::NamedFile::open(path)
@@ -196,16 +188,13 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
     Ok(response)
 }
 
-fn is_markdown(path: &std::path::Path) -> bool
-{
+fn is_markdown(path: &std::path::Path) -> bool {
     path.extension() == Some(std::ffi::OsStr::new("md"))
 }
 
-fn get_path(request: &actix_web::HttpRequest) -> std::path::PathBuf
-{
+fn get_path(request: &actix_web::HttpRequest) -> std::path::PathBuf {
     let slug = request.match_info().query("slug");
-    let data: &Data = request.app_data()
-        .unwrap();
+    let data: &Data = request.app_data().unwrap();
 
     let mut path = std::path::PathBuf::new();
     path.push(&data.root);
@@ -214,8 +203,7 @@ fn get_path(request: &actix_web::HttpRequest) -> std::path::PathBuf
     path
 }
 
-fn markdown(input: &str) -> String
-{
+fn markdown(input: &str) -> String {
     let mut output = String::new();
 
     let mut options = pulldown_cmark::Options::empty();
@@ -227,11 +215,13 @@ fn markdown(input: &str) -> String
 
     let regex = regex::Regex::new(r#"<h1>(?P<text>.*?)</h1>"#).unwrap();
 
-    regex.replace_all(&output, |caps: &regex::Captures<'_>| {
-        let id = text_to_id(&caps["text"]);
+    regex
+        .replace_all(&output, |caps: &regex::Captures<'_>| {
+            let id = text_to_id(&caps["text"]);
 
-        format!("<h1 id=\"{id}\">{}</h1>", &caps["text"])
-    }).to_string()
+            format!("<h1 id=\"{id}\">{}</h1>", &caps["text"])
+        })
+        .to_string()
 }
 
 fn text_to_id(text: &str) -> String {
@@ -253,7 +243,11 @@ fn table_of_content(input: &str) -> String {
                 current_level = Some(level);
             }
             Text(text) if current_level.is_some() => {
-                toc.push_str(&format!("<li><a href=\"#{}\">{}</a></li>\n", text_to_id(&text), text));
+                toc.push_str(&format!(
+                    "<li><a href=\"#{}\">{}</a></li>\n",
+                    text_to_id(&text),
+                    text
+                ));
             }
             End(Heading(level, _, _)) => {
                 if Some(level) <= current_level {
@@ -268,8 +262,7 @@ fn table_of_content(input: &str) -> String {
     toc
 }
 
-fn generate_title(title: &str, slug: &str) -> String
-{
+fn generate_title(title: &str, slug: &str) -> String {
     slug.split('/')
         .rev()
         .chain(vec![title])
@@ -277,8 +270,7 @@ fn generate_title(title: &str, slug: &str) -> String
         .join(" | ")
 }
 
-fn generate_breadcrumb(slug: &str) -> String
-{
+fn generate_breadcrumb(slug: &str) -> String {
     let mut breadcrumb = String::from("[~](/)");
     let mut url = String::new();
 
@@ -290,8 +282,11 @@ fn generate_breadcrumb(slug: &str) -> String
     breadcrumb
 }
 
-fn generate_media(template: &tera_hot::Template, root: &str, path: &std::path::Path) -> Result<String, Error>
-{
+fn generate_media(
+    template: &tera_hot::Template,
+    root: &str,
+    path: &std::path::Path,
+) -> Result<String, Error> {
     let mut files = vec![];
 
     if path.to_str() == Some("") {
@@ -320,8 +315,7 @@ fn generate_media(template: &tera_hot::Template, root: &str, path: &std::path::P
     }
 }
 
-fn generate_index(root: &str, path: &std::path::Path) -> String
-{
+fn generate_index(root: &str, path: &std::path::Path) -> String {
     let mut summary = String::new();
 
     if path.to_str() == Some("") {
@@ -348,13 +342,9 @@ fn generate_index(root: &str, path: &std::path::Path) -> String
     summary
 }
 
-fn link(root: &str, path: &std::path::Path, entry: &walkdir::DirEntry) -> String
-{
+fn link(root: &str, path: &std::path::Path, entry: &walkdir::DirEntry) -> String {
     let mut root = root.to_string();
-    let entry = entry.path()
-        .strip_prefix(path)
-        .unwrap()
-        .display();
+    let entry = entry.path().strip_prefix(path).unwrap().display();
 
     if !root.starts_with('/') {
         root.insert(0, '/');
@@ -366,22 +356,17 @@ fn link(root: &str, path: &std::path::Path, entry: &walkdir::DirEntry) -> String
 
     let link = format!("{}{}", root, entry);
 
-    url::form_urlencoded::Serializer::new(link)
-        .finish()
+    url::form_urlencoded::Serializer::new(link).finish()
 }
 
-fn title(entry: &walkdir::DirEntry) -> String
-{
-    entry.file_name()
+fn title(entry: &walkdir::DirEntry) -> String {
+    entry.file_name().to_str().unwrap().replace(".md", "")
+}
+
+fn is_hidden(entry: &walkdir::DirEntry) -> bool {
+    entry
+        .file_name()
         .to_str()
-        .unwrap()
-        .replace(".md", "")
-}
-
-fn is_hidden(entry: &walkdir::DirEntry) -> bool
-{
-    entry.file_name()
-         .to_str()
-         .map(|s| s.starts_with('.') || s == "index.md")
-         .unwrap_or(false)
+        .map(|s| s.starts_with('.') || s == "index.md")
+        .unwrap_or(false)
 }
