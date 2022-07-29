@@ -244,9 +244,8 @@ fn table_of_content(input: &str) -> String {
             }
             Text(text) if current_level.is_some() => {
                 toc.push_str(&format!(
-                    "<li><a href=\"#{}\">{}</a></li>\n",
+                    "<li><a href=\"#{}\">{text}</a></li>\n",
                     text_to_id(&text),
-                    text
                 ));
             }
             End(Heading(level, _, _)) => {
@@ -275,8 +274,8 @@ fn generate_breadcrumb(slug: &str) -> String {
     let mut url = String::new();
 
     for part in slug.split('/') {
-        url.push_str(&format!("/{}", part));
-        breadcrumb.push_str(&format!("/[{}]({})", part, url));
+        url.push_str(&format!("/{part}"));
+        breadcrumb.push_str(&format!("/[{part}]({url})"));
     }
 
     breadcrumb
@@ -335,7 +334,7 @@ fn generate_index(root: &str, path: &std::path::Path) -> String {
             let link = link(root, path, &entry);
             let title = title(&entry);
 
-            summary.push_str(&format!("{}* [{}]({})\n", indent, title, link));
+            summary.push_str(&format!("{indent}* [{title}]({link})\n"));
         }
     }
 
@@ -354,7 +353,7 @@ fn link(root: &str, path: &std::path::Path, entry: &walkdir::DirEntry) -> String
         root.push('/');
     }
 
-    let link = format!("{}{}", root, entry);
+    let link = format!("{root}{entry}");
 
     url::form_urlencoded::Serializer::new(link).finish()
 }

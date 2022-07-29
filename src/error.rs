@@ -17,7 +17,7 @@ impl std::fmt::Display for Error {
             Error::Template(_) => "Template error",
         };
 
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -39,12 +39,12 @@ impl actix_web::error::ResponseError for Error {
         let file = format!("errors/{}.html", u16::from(status));
         let template = match tera::Tera::new("templates/**/*") {
             Ok(template) => template,
-            Err(err) => panic!("Parsing error(s): {}", err),
+            Err(err) => panic!("Parsing error(s): {err}"),
         };
         let body = match template.render(&file, &tera::Context::new()) {
             Ok(body) => body,
             Err(err) => {
-                eprintln!("{:?}", err);
+                eprintln!("{err:?}");
 
                 "Internal server error".to_string()
             }

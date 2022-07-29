@@ -13,7 +13,7 @@ impl Media {
         Self {
             path: path.to_path_buf(),
             id: url.to_string(),
-            thumbnail: format!("/thumbnail{}", &url),
+            thumbnail: format!("/thumbnail{url}"),
             url: url.to_string(),
             info: Info::new(path),
             title: title.to_string(),
