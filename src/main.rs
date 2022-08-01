@@ -278,7 +278,7 @@ fn generate_breadcrumb(slug: &str) -> String {
 
     for part in slug.split('/') {
         write!(url, "/{part}").ok();
-        write!(breadcrumb, "/[{part}]({url})").ok();
+        write!(breadcrumb, "/[{part}]({})", url_encode(&url)).ok();
     }
 
     breadcrumb
@@ -358,7 +358,11 @@ fn link(root: &str, path: &std::path::Path, entry: &walkdir::DirEntry) -> String
 
     let link = format!("{root}{entry}");
 
-    url::form_urlencoded::Serializer::new(link).finish()
+    url_encode(&link)
+}
+
+fn url_encode(url: &str) -> String {
+    url.replace(' ', "%20")
 }
 
 fn title(entry: &walkdir::DirEntry) -> String {
