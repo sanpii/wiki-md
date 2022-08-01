@@ -1,4 +1,4 @@
-#[derive(serde_derive::Serialize)]
+#[derive(serde::Serialize)]
 pub struct Media {
     path: std::path::PathBuf,
     pub id: String,
@@ -21,7 +21,7 @@ impl Media {
     }
 }
 
-#[derive(serde_derive::Serialize)]
+#[derive(serde::Serialize)]
 pub struct Info {
     is_dir: bool,
     is_image: bool,

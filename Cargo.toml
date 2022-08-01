@@ -16,7 +16,9 @@ pulldown-cmark = "0.9"
 tera = "1.0"
 tera-hot = "0.3"
 regex = "1.1"
-serde = "1.0"
-serde_derive = "1.0"
 url = "2.0"
 walkdir = "2.2"
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
