@@ -6,6 +6,7 @@ mod media;
 
 use error::Error;
 use media::Media;
+use std::fmt::Write as _;
 
 static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
@@ -243,10 +244,12 @@ fn table_of_content(input: &str) -> String {
                 current_level = Some(level);
             }
             Text(text) if current_level.is_some() => {
-                toc.push_str(&format!(
-                    "<li><a href=\"#{}\">{text}</a></li>\n",
-                    text_to_id(&text),
-                ));
+                writeln!(
+                    toc,
+                    "<li><a href=\"#{}\">{text}</a></li>",
+                    text_to_id(&text)
+                )
+                .ok();
             }
             End(Heading(level, _, _)) => {
                 if Some(level) <= current_level {
@@ -274,8 +277,8 @@ fn generate_breadcrumb(slug: &str) -> String {
     let mut url = String::new();
 
     for part in slug.split('/') {
-        url.push_str(&format!("/{part}"));
-        breadcrumb.push_str(&format!("/[{part}]({url})"));
+        write!(url, "/{part}").ok();
+        write!(breadcrumb, "/[{part}]({url})").ok();
     }
 
     breadcrumb
@@ -334,7 +337,7 @@ fn generate_index(root: &str, path: &std::path::Path) -> String {
             let link = link(root, path, &entry);
             let title = title(&entry);
 
-            summary.push_str(&format!("{indent}* [{title}]({link})\n"));
+            writeln!(summary, "{indent}* [{title}]({link})").ok();
         }
     }
 
