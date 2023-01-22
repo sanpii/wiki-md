@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', function (){
     var search = document.getElementById('search');
 
+    if (search == null) {
+        return;
+    }
+
     search.addEventListener('keyup', function (event) {
         var filter = event.target.value.toLowerCase();
 
