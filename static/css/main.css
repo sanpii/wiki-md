@@ -28,6 +28,12 @@ table td, table th {
     font-size: 36px;
 }
 
+@media print {
+    .navbar {
+        font-size: 24px;
+    }
+}
+
 .navbar-form {
     margin: 0;
 }
