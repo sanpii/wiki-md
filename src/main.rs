@@ -51,7 +51,7 @@ async fn main() -> std::io::Result<()> {
 }
 
 fn env(name: &str) -> String {
-    std::env::var(name).unwrap_or_else(|_| panic!("Missing {} env variable", name))
+    std::env::var(name).unwrap_or_else(|_| panic!("Missing {name} env variable"))
 }
 
 async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
