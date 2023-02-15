@@ -81,8 +81,8 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
 fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static str) {
     let ext = path
         .extension()
-        .and_then(|s| s.to_str())
-        .map_or("".to_string(), |s| s.to_ascii_lowercase());
+        .and_then(std::ffi::OsStr::to_str)
+        .map_or_else(|| String::new(), str::to_ascii_lowercase);
 
     match ext.as_str() {
         "png" => (image::ImageOutputFormat::Png, "image/png"),
