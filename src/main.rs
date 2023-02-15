@@ -135,10 +135,7 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
         media = path.join(".media").exists();
 
         if media {
-            let media = match generate_media(&data.template, slug, &path) {
-                Ok(contents) => contents,
-                Err(err) => return Err(err),
-            };
+            let media = generate_media(&data.template, slug, &path)?;
             contents.push_str(&media);
         } else {
             let index = generate_index(slug, &path);
@@ -148,15 +145,10 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
     } else if is_markdown(&path) {
         let mut contents = String::new();
 
-        let mut file = match std::fs::File::open(path) {
-            Ok(file) => file,
-            Err(_) => return Err(Error::NotFound),
-        };
+        let mut file = std::fs::File::open(path).map_err(|_| Error::NotFound)?;
 
-        match file.read_to_string(&mut contents) {
-            Ok(_) => (),
-            Err(_) => return Err(Error::NotFound),
-        };
+        file.read_to_string(&mut contents)
+            .map_err(|_| Error::NotFound)?;
 
         context.insert("toc", &table_of_content(&contents));
         context.insert("contents", &markdown(&contents));
