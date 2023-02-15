@@ -57,15 +57,12 @@ fn env(name: &str) -> String {
 async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
     let path = get_path(&request);
 
-    let image = match image::open(&path) {
-        Ok(image) => image,
-        Err(_) => {
-            use actix_web::Responder;
+    let Ok(image) = image::open(&path) else {
+        use actix_web::Responder;
 
-            return actix_files::NamedFile::open("static/img/missing.png")
-                .unwrap()
-                .respond_to(&request);
-        }
+        return actix_files::NamedFile::open("static/img/missing.png")
+            .unwrap()
+            .respond_to(&request);
     };
 
     let thumbnail = image.thumbnail(200, 200);
