@@ -82,7 +82,7 @@ fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static s
     let ext = path
         .extension()
         .and_then(std::ffi::OsStr::to_str)
-        .map_or_else(|| String::new(), str::to_ascii_lowercase);
+        .map_or_else(String::new, str::to_ascii_lowercase);
 
     match ext.as_str() {
         "png" => (image::ImageOutputFormat::Png, "image/png"),
