@@ -21,7 +21,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     #[cfg(debug_assertions)]
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     let bind = format!("{}:{}", env("LISTEN_IP"), env("LISTEN_PORT"));
 
