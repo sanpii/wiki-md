@@ -4,7 +4,7 @@ mod error;
 mod filters;
 mod media;
 
-use error::Error;
+use error::*;
 use media::Media;
 use std::fmt::Write as _;
 
@@ -17,24 +17,25 @@ struct Data {
 }
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result {
+    #[cfg(debug_assertions)]
+    envir::dotenv();
+
     env_logger::init();
 
-    #[cfg(debug_assertions)]
-    dotenvy::dotenv().ok();
+    let bind = format!("{}:{}", envir::get("LISTEN_IP")?, envir::get("LISTEN_PORT")?);
 
-    let bind = format!("{}:{}", env("LISTEN_IP"), env("LISTEN_PORT"));
+    let root = envir::get("APP_WIKI_ROOT")?;
+    let title = envir::get("APP_TITLE")?;
 
-    actix_web::HttpServer::new(|| {
-        let root = env("APP_WIKI_ROOT");
-        let title = env("APP_TITLE");
+    actix_web::HttpServer::new(move || {
         let mut template = tera_hot::Template::new(TEMPLATE_DIR);
         template.register_filter("markdown", crate::filters::markdown);
 
         let data = Data {
-            root: std::path::PathBuf::from(root),
+            root: std::path::PathBuf::from(&root),
             template,
-            title,
+            title: title.clone(),
         };
 
         let static_files = actix_files::Files::new("/static", "static/");
@@ -47,11 +48,9 @@ async fn main() -> std::io::Result<()> {
     })
     .bind(&bind)?
     .run()
-    .await
-}
+    .await?;
 
-fn env(name: &str) -> String {
-    std::env::var(name).unwrap_or_else(|_| panic!("Missing {name} env variable"))
+    Ok(())
 }
 
 async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
@@ -97,7 +96,7 @@ fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static s
     }
 }
 
-async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse, Error> {
+async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
     use std::io::Read;
 
     let data: &Data = request.app_data().unwrap();
@@ -277,7 +276,7 @@ fn generate_media(
     template: &tera_hot::Template,
     root: &str,
     path: &std::path::Path,
-) -> Result<String, Error> {
+) -> Result<String> {
     let mut files = vec![];
 
     if path.to_str() == Some("") {

@@ -1,7 +1,23 @@
+pub type Result<T = ()> = std::result::Result<T, Error>;
+
 #[derive(Debug)]
 pub enum Error {
+    Env(envir::Error),
+    Io(std::io::Error),
     NotFound,
     Template(tera::Error),
+}
+
+impl From<envir::Error> for Error {
+    fn from(err: envir::Error) -> Self {
+        Error::Env(err)
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(err: std::io::Error) -> Self {
+        Error::Io(err)
+    }
 }
 
 impl From<tera::Error> for Error {
@@ -13,8 +29,10 @@ impl From<tera::Error> for Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            Error::NotFound => "Not found",
-            Error::Template(_) => "Template error",
+            Error::Env(e) => e.to_string(),
+            Error::Io(e) => e.to_string(),
+            Error::NotFound => "Not found".to_string(),
+            Error::Template(_) => "Template error".to_string(),
         };
 
         write!(f, "{s}")
@@ -27,7 +45,7 @@ impl From<&Error> for actix_web::http::StatusCode {
 
         match error {
             Error::NotFound => StatusCode::NOT_FOUND,
-            Error::Template(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
@@ -55,3 +73,5 @@ impl actix_web::error::ResponseError for Error {
             .body(body)
     }
 }
+
+impl std::error::Error for Error {}
