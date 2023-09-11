@@ -7,5 +7,5 @@ pub fn markdown(
     let input = tera::try_get_value!("markdown", "value", String, value);
     let output = crate::markdown(&input);
 
-    Ok(tera::to_value(output).unwrap())
+    Ok(tera::to_value(output)?)
 }
