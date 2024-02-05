@@ -224,10 +224,10 @@ fn table_of_content(input: &str) -> String {
     let parser = pulldown_cmark::Parser::new(input);
 
     for event in parser {
-        use pulldown_cmark::{Event::*, Tag::*};
+        use pulldown_cmark::{Event::*, Tag::*, TagEnd};
 
         match event {
-            Start(Heading(level, _, _)) if level == pulldown_cmark::HeadingLevel::H1 => {
+            Start(Heading { level, .. }) if level == pulldown_cmark::HeadingLevel::H1 => {
                 toc.push_str("<ul>\n");
                 current_level = Some(level);
             }
@@ -239,7 +239,7 @@ fn table_of_content(input: &str) -> String {
                 )
                 .ok();
             }
-            End(Heading(level, _, _)) => {
+            End(TagEnd::Heading(level)) => {
                 if Some(level) <= current_level {
                     toc.push_str("</ul>\n");
                     current_level = None;
