@@ -57,16 +57,15 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
     let path = get_path(&request);
 
     let Ok(image) = image::open(&path) else {
-        use actix_web::Responder;
-
-        return actix_files::NamedFile::open("static/img/missing.png")
-            .unwrap()
-            .respond_to(&request);
+        return missing(&request);
     };
 
     let thumbnail = image.thumbnail(200, 200);
     let mut body: Vec<u8> = Vec::new();
-    let (format, content_type) = guess_format(&path);
+    let Ok(format) = image::ImageFormat::from_path(&path) else {
+        return missing(&request);
+    };
+    let content_type = format.to_mime_type();
 
     thumbnail
         .write_to(&mut std::io::Cursor::new(&mut body), format)
@@ -77,23 +76,12 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
         .body(body)
 }
 
-fn guess_format(path: &std::path::Path) -> (image::ImageOutputFormat, &'static str) {
-    let ext = path
-        .extension()
-        .and_then(std::ffi::OsStr::to_str)
-        .map_or_else(String::new, str::to_ascii_lowercase);
+fn missing(request: &actix_web::HttpRequest) -> actix_web::HttpResponse {
+    use actix_web::Responder;
 
-    match ext.as_str() {
-        "png" => (image::ImageOutputFormat::Png, "image/png"),
-        "jpeg" | "jpg" => (image::ImageOutputFormat::Jpeg(80), "image/jpeg"),
-        "gif" => (image::ImageOutputFormat::Gif, "image/gif"),
-        "bmp" => (image::ImageOutputFormat::Bmp, "image/bmp"),
-        "ico" => (image::ImageOutputFormat::Ico, "image/x-icon"),
-        _ => (
-            image::ImageOutputFormat::Unsupported(ext),
-            "image/octet-stream",
-        ),
-    }
+    return actix_files::NamedFile::open("static/img/missing.png")
+        .unwrap()
+        .respond_to(&request);
 }
 
 async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
