@@ -79,9 +79,9 @@ async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
 fn missing(request: &actix_web::HttpRequest) -> actix_web::HttpResponse {
     use actix_web::Responder;
 
-    return actix_files::NamedFile::open("static/img/missing.png")
+    actix_files::NamedFile::open("static/img/missing.png")
         .unwrap()
-        .respond_to(&request);
+        .respond_to(request)
 }
 
 async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
