@@ -185,6 +185,7 @@ fn markdown(input: &str) -> String {
 
     let mut options = pulldown_cmark::Options::empty();
     options.insert(pulldown_cmark::Options::ENABLE_TABLES);
+    options.insert(pulldown_cmark::Options::ENABLE_GFM);
     options.insert(pulldown_cmark::Options::ENABLE_FOOTNOTES);
 
     let parser = pulldown_cmark::Parser::new_ext(input, options);
