@@ -18,10 +18,7 @@ struct Data {
 
 #[actix_web::main]
 async fn main() -> Result {
-    #[cfg(debug_assertions)]
-    envir::dotenv();
-
-    env_logger::init();
+    envir::init();
 
     let bind = format!("{}:{}", envir::get("LISTEN_IP")?, envir::get("LISTEN_PORT")?);
 
