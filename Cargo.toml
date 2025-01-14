@@ -12,7 +12,7 @@ log = "0.4"
 image = "0.25"
 pulldown-cmark = "0.12"
 tera = "1.0"
-tera-hot = "0.4"
+tera-hot = "0.5"
 regex = "1.1"
 walkdir = "2.2"
 
