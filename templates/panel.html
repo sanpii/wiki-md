@@ -11,7 +11,7 @@
                 <li data-content="{{ file.title }}">
             {% endif %}
 
-                <a href="#media-{{ file.id }}">
+                <a href="#media{{ file.id }}">
                     {% if file.info.is_image %}
                         <img src="{{ file.thumbnail }}" />
                     {% elif file.info.is_sound %}
@@ -21,7 +21,7 @@
                     {% endif %}
                 </a>
 
-                <div id="media-{{ file.id }}" class="overlay">
+                <div id="media{{ file.id }}" class="overlay">
                     {% if file.info.is_image %}
                         <img src="{{ file.url }}" />
                     {% elif file.info.is_sound %}
