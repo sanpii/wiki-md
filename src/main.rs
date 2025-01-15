@@ -347,5 +347,5 @@ fn is_hidden(entry: &walkdir::DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map_or(false, |s| s.starts_with('.') || s == "index.md")
+        .is_some_and(|s| s.starts_with('.') || s == "index.md")
 }
