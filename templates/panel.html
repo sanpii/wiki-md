@@ -14,6 +14,8 @@
                 <a href="#media{{ file.id }}">
                     {% if file.info.is_image %}
                         <img src="{{ file.thumbnail }}" />
+                    {% elif file.info.is_pdf %}
+                        <i class="bi bi-file-earmark-pdf"></i></a>
                     {% elif file.info.is_sound %}
                         <i class="bi bi-music-note-beamed"></i></a>
                     {% elif file.info.is_video %}
@@ -24,6 +26,8 @@
                 <div id="media{{ file.id }}" class="overlay">
                     {% if file.info.is_image %}
                         <img src="{{ file.url }}" />
+                    {% elif file.info.is_pdf %}
+                        <embed src="{{ file.url }}" height="100%" width="90%" type="application/pdf">
                     {% elif file.info.is_sound %}
                         <audio src="{{ file.url }}" controls></audio>
                     {% elif file.info.is_video %}
