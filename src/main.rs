@@ -20,7 +20,11 @@ struct Data {
 async fn main() -> Result {
     envir::init();
 
-    let bind = format!("{}:{}", envir::get("LISTEN_IP")?, envir::get("LISTEN_PORT")?);
+    let bind = format!(
+        "{}:{}",
+        envir::get("LISTEN_IP")?,
+        envir::get("LISTEN_PORT")?
+    );
 
     let root = envir::get("APP_WIKI_ROOT")?;
     let title = envir::get("APP_TITLE")?;
