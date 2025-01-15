@@ -57,14 +57,22 @@ async fn main() -> Result {
 async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
     let path = path(&request);
 
-    let Ok(image) = image::open(&path) else {
-        return missing(&request);
+    let image = match image::open(&path) {
+        Ok(image) => image,
+        Err(err) => {
+            log::error!("Unable to open {path:?}: {err:?}");
+            return missing(&request);
+        }
     };
 
     let thumbnail = image.thumbnail(200, 200);
     let mut body: Vec<u8> = Vec::new();
-    let Ok(format) = image::ImageFormat::from_path(&path) else {
-        return missing(&request);
+    let format = match image::ImageFormat::from_path(&path) {
+        Ok(image) => image,
+        Err(err) => {
+            log::error!("Unable to dicovert image format {path:?}: {err:?}");
+            return missing(&request);
+        }
     };
     let content_type = format.to_mime_type();
 
