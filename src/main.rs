@@ -55,7 +55,7 @@ async fn main() -> Result {
 }
 
 async fn thumbnail(request: actix_web::HttpRequest) -> actix_web::HttpResponse {
-    let path = get_path(&request);
+    let path = path(&request);
 
     let Ok(image) = image::open(&path) else {
         return missing(&request);
@@ -91,7 +91,7 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
     let data: &Data = request.app_data().unwrap();
     let slug = request.match_info().query("slug");
 
-    let path = get_path(&request);
+    let path = path(&request);
 
     if !path.exists() {
         return Err(Error::NotFound);
@@ -170,7 +170,7 @@ fn is_markdown(path: &std::path::Path) -> bool {
     path.extension() == Some(std::ffi::OsStr::new("md"))
 }
 
-fn get_path(request: &actix_web::HttpRequest) -> std::path::PathBuf {
+fn path(request: &actix_web::HttpRequest) -> std::path::PathBuf {
     let slug = request.match_info().query("slug");
     let data: &Data = request.app_data().unwrap();
 
