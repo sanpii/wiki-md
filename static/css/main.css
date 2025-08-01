@@ -44,7 +44,35 @@ table td, table th {
 
 h1 {
     border-bottom: 1px solid #eee;
-    margin: 30px 0;
+    margin: 0 0 30px 0;
+}
+
+#metadata {
+    margin-top: 20px;
+}
+
+#metadata span {
+    margin-right: 10px;
+}
+
+#metadata .no-gluten {
+    content: url(/static/img/no-gluten.png);
+    filter: brightness(0) saturate(100%) invert(76%) sepia(67%) saturate(1068%) hue-rotate(354deg) brightness(101%) contrast(92%);
+}
+
+#metadata .meat {
+    content: url(/static/img/meat.png);
+    filter: brightness(0) saturate(100%) invert(12%) sepia(97%) saturate(5706%) hue-rotate(353deg) brightness(93%) contrast(86%);
+}
+
+#metadata .no-sugar {
+    content: url(/static/img/no-sugar.png);
+    filter: brightness(0) saturate(100%) invert(51%) sepia(94%) saturate(516%) hue-rotate(186deg) brightness(102%) contrast(84%);
+}
+
+#metadata .vegan {
+    content: url(/static/img/vegan.png);
+    filter: brightness(0) saturate(100%) invert(25%) sepia(95%) saturate(2452%) hue-rotate(75deg) brightness(102%) contrast(102%);
 }
 
 .container img {

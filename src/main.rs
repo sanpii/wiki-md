@@ -3,9 +3,11 @@
 mod error;
 mod filters;
 mod media;
+mod metadata;
 
 use error::*;
 use media::Media;
+use metadata::Metadata;
 use std::fmt::Write as _;
 
 static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
@@ -196,19 +198,24 @@ fn markdown(input: &str) -> String {
     options.insert(pulldown_cmark::Options::ENABLE_TABLES);
     options.insert(pulldown_cmark::Options::ENABLE_GFM);
     options.insert(pulldown_cmark::Options::ENABLE_FOOTNOTES);
+    options.insert(pulldown_cmark::Options::ENABLE_YAML_STYLE_METADATA_BLOCKS);
+
+    let metadata = Metadata::parse(input);
 
     let parser = pulldown_cmark::Parser::new_ext(input, options);
     pulldown_cmark::html::push_html(&mut output, parser);
 
     let regex = regex::Regex::new(r#"<h1>(?P<text>.*?)</h1>"#).unwrap();
 
-    regex
+    let body = regex
         .replace_all(&output, |caps: &regex::Captures<'_>| {
             let id = text_to_id(&caps["text"]);
 
             format!("<h1 id=\"{id}\">{}</h1>", &caps["text"])
         })
-        .to_string()
+        .to_string();
+
+    format!("{}\n{body}", metadata.to_html())
 }
 
 fn text_to_id(text: &str) -> String {
