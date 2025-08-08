@@ -118,16 +118,16 @@ async fn index(request: actix_web::HttpRequest) -> Result<actix_web::HttpRespons
 
         let index = path.join("index.md");
 
-        if index.exists() {
-            if let Ok(mut file) = std::fs::File::open(index) {
-                let mut summary = String::new();
+        if index.exists()
+            && let Ok(mut file) = std::fs::File::open(index)
+        {
+            let mut summary = String::new();
 
-                file.read_to_string(&mut summary).ok();
+            file.read_to_string(&mut summary).ok();
 
-                let regex = regex::Regex::new(r"(?m)^").unwrap();
+            let regex = regex::Regex::new(r"(?m)^").unwrap();
 
-                contents = markdown(&regex.replace_all(&summary, "> "));
-            }
+            contents = markdown(&regex.replace_all(&summary, "> "));
         }
 
         media = path.join(".media").exists();
@@ -244,11 +244,9 @@ fn table_of_content(input: &str) -> String {
                 )
                 .ok();
             }
-            End(TagEnd::Heading(level)) => {
-                if Some(level) <= current_level {
-                    toc.push_str("</ul>\n");
-                    current_level = None;
-                }
+            End(TagEnd::Heading(level)) if Some(level) <= current_level => {
+                toc.push_str("</ul>\n");
+                current_level = None;
             }
             _ => (),
         }
