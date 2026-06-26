@@ -1,11 +1,9 @@
-use tera::Value;
-
 pub fn markdown(
-    value: &Value,
-    _: &std::collections::HashMap<String, Value>,
-) -> tera::Result<Value> {
-    let input = tera::try_get_value!("markdown", "value", String, value);
-    let output = crate::markdown(&input);
+    value: String,
+    _: tera::Kwargs,
+    _: &tera::State,
+) -> tera::TeraResult<String> {
+    let output = crate::markdown(&value);
 
-    Ok(tera::to_value(output)?)
+    Ok(output)
 }

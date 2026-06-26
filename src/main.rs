@@ -13,7 +13,7 @@ use std::fmt::Write as _;
 static TEMPLATE_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/templates");
 
 struct Data {
-    template: tera_hot::Template,
+    template: tera::Tera,
     root: std::path::PathBuf,
     title: String,
 }
@@ -32,8 +32,9 @@ async fn main() -> Result {
     let title = envir::get("APP_TITLE")?;
 
     actix_web::HttpServer::new(move || {
-        let mut template = tera_hot::Template::new(TEMPLATE_DIR);
+        let mut template = tera::Tera::new();
         template.register_filter("markdown", crate::filters::markdown);
+        template.load_from_glob(&format!("{TEMPLATE_DIR}/**/*")).unwrap();
 
         let data = Data {
             root: std::path::PathBuf::from(&root),
@@ -276,11 +277,11 @@ fn generate_breadcrumb(slug: &str) -> String {
 }
 
 fn generate_media(
-    template: &tera_hot::Template,
+    template: &tera::Tera,
     root: &str,
     path: &std::path::Path,
 ) -> Result<String> {
-    let mut files = vec![];
+    let mut files = Vec::new();
 
     if path.to_str() == Some("") {
         return Ok(String::new());

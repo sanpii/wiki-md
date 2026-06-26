@@ -11,11 +11,13 @@ envir = "1.0"
 log = "0.4"
 image = "0.25"
 pulldown-cmark = "0.13"
-tera = "1.0"
-tera-hot = "0.5"
 regex = "1.1"
 walkdir = "2.2"
 
 [dependencies.serde]
 version = "1.0"
 features = ["derive"]
+
+[dependencies.tera]
+version = "2.0"
+features = ["glob_fs"]
