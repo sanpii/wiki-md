@@ -5,7 +5,7 @@ authors = ["Sanpi <sanpi@homecomputing.fr>"]
 edition = "2024"
 
 [dependencies]
-actix-files = "0.6"
+actix-files = "0.7"
 actix-web = "4.0"
 envir = "1.0"
 log = "0.4"
