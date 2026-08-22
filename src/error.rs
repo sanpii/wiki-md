@@ -56,8 +56,14 @@ impl actix_web::error::ResponseError for Error {
 
         let mut template = tera::Tera::new();
         match template.add_template_files(vec![
-            (format!("{}/errors/base.html", crate::TEMPLATE_DIR), Some("base.html")),
-            (format!("{}/errors/{}.html", crate::TEMPLATE_DIR, u16::from(status)), Some("error")),
+            (
+                format!("{}/errors/base.html", crate::TEMPLATE_DIR),
+                Some("base.html"),
+            ),
+            (
+                format!("{}/errors/{}.html", crate::TEMPLATE_DIR, u16::from(status)),
+                Some("error"),
+            ),
         ]) {
             Ok(template) => template,
             Err(err) => panic!("Parsing error(s): {err}"),

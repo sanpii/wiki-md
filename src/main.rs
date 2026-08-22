@@ -34,7 +34,9 @@ async fn main() -> Result {
     actix_web::HttpServer::new(move || {
         let mut template = tera::Tera::new();
         template.register_filter("markdown", crate::filters::markdown);
-        template.load_from_glob(&format!("{TEMPLATE_DIR}/**/*")).unwrap();
+        template
+            .load_from_glob(&format!("{TEMPLATE_DIR}/**/*"))
+            .unwrap();
 
         let data = Data {
             root: std::path::PathBuf::from(&root),
@@ -276,11 +278,7 @@ fn generate_breadcrumb(slug: &str) -> String {
     breadcrumb
 }
 
-fn generate_media(
-    template: &tera::Tera,
-    root: &str,
-    path: &std::path::Path,
-) -> Result<String> {
+fn generate_media(template: &tera::Tera, root: &str, path: &std::path::Path) -> Result<String> {
     let mut files = Vec::new();
 
     if path.to_str() == Some("") {
